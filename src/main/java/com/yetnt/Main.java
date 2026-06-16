@@ -10,12 +10,15 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        Path filePath = Paths.get("C:\\Users\\ACER\\Documents\\code\\bitforce\\target\\classes\\com\\yetnt\\Main.class");
+        Path filePath = Paths.get("C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\bootsamsung.qmg");
         try {
             byte[] fileBytes = Files.readAllBytes(filePath);
+            int lines = 0;
             for (byte b : fileBytes) {
+                lines++;
                 // print in 2 bit pairs, e.g. 01 10 11 00
-                System.out.println(format(b));
+                System.out.print(format2(b));
+//                if (lines >= 100) break;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -29,6 +32,12 @@ public class Main {
         + " - " + String.format("%02X ", b) +
         // print as UTF-8
 
-        " - " + new String(new byte[]{b}, StandardCharsets.UTF_8);
+        " - " + new String(new byte[]{b}, StandardCharsets.UTF_8)
+                + "\n";
+    }
+
+    public static String format2(byte b) {
+        return
+                String.format("%02X", b) + " ";
     }
 }
