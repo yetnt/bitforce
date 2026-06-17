@@ -1,5 +1,7 @@
 package com.yetnt;
 
+import com.yetnt.ui.Window;
+
 import javax.swing.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,16 +14,17 @@ public class Main {
     public static void main(String[] args) {
         Path filePath = Paths.get("C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\bootsamsung.qmg");
         try {
-            byte[] fileBytes = Files.readAllBytes(filePath);
-            int lines = 0;
-            for (byte b : fileBytes) {
-                lines++;
-                // print in 2 bit pairs, e.g. 01 10 11 00
-                System.out.print(format2(b));
-//                if (lines >= 100) break;
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
             }
-        } catch (IOException e) {
+            new Window(Files.readAllBytes(filePath)).setVisible(true);
+        } catch (IOException | IllegalAccessException e) {
             e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException e) {
+            throw new RuntimeException(e);
         }
     }
 

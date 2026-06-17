@@ -100,6 +100,15 @@ public class JLabelRichText {
         return this;
     }
 
+    public JLabelRichText font(Color col, String size, Color backgroundCol) {
+        open.add("<font color=\"" +
+                String.format("#%02x%02x%02x", col.getRed(), col.getGreen(), col.getBlue())
+                + "\" size=\"" + size + "\" bgcolor=\"" +
+                String.format("#%02x%02x%02x", backgroundCol.getRed(), backgroundCol.getGreen(), backgroundCol.getBlue()) + "\">");
+        close.add("</font>");
+        return this;
+    }
+
     /**
      * Applies a specific font size to the content.
      *
@@ -157,6 +166,7 @@ public class JLabelRichText {
     /**
      * Generates the HTML string representation of the rich text content,
      * applying all accumulated open and close tags.
+     * @implNote This does not apply the html opening and closing tags.
      * @return The HTML string.
      */
     public String toString() {
