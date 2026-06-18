@@ -1,17 +1,41 @@
 package com.yetnt.methods;
 
 import javax.swing.*;
+import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 import java.util.ArrayList;
 
+/**
+ * The base class for interpreting byte arrays.
+ * @implNote This as a superclass provides the {@link JRadioButton} and the {@link JMenuItem}
+ * for interacting with this particular method within the UI. The {@link #getMethods()} defines
+ * the {@code keycode} that the JMenuItem will expect. Each key code however has a base modifier of
+ * {@link KeyEvent#SHIFT_DOWN_MASK} and can provide any other extra modifiers to prevent clashes.
+ * @implSpec Only interpretation methods are allowed to use a keycode which contains
+ * {@link KeyEvent#SHIFT_DOWN_MASK} and {@code (any letter)}.
+ * @author Lehlogonolo Poole
+ */
 public class InterpMethod {
     private JRadioButton radioButton;
     private String name;
     private VAConsumer interpreter;
-
-    public InterpMethod(String name) {
+    private JMenuItem menuItem;
+    /**
+     * Constructs a new InterpMethod.
+     * @param name The name of the interpretation method.
+     * @param keystrokeKey The key code for the JMenuItem accelerator.
+     * @param modifiers Additional modifiers for the JMenuItem accelerator,
+     *                  which will be ORed with {@link KeyEvent#SHIFT_DOWN_MASK}.
+     */
+    public InterpMethod(String name, int keystrokeKey, int modifiers) {
         this.name = name;
         radioButton = new JRadioButton(name);
         radioButton.setToolTipText(name);
+        menuItem = new JMenuItem(name);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                keystrokeKey,
+                KeyEvent.SHIFT_DOWN_MASK | modifiers
+        ));
     }
 
     protected InterpMethod setInterpreter(VAConsumer interpreter) {
@@ -23,23 +47,33 @@ public class InterpMethod {
         return radioButton;
     }
 
+    public JMenuItem  getMenuItem() {
+        return menuItem;
+    }
+
     public String interpret(byte[] bytes, Endianess endianess) {
         return interpreter.consume(bytes, endianess);
     }
 
     public static ArrayList<InterpMethod> getMethods() {
         ArrayList<InterpMethod> methods = new ArrayList<>();
-        methods.add(new uint16());
-        methods.add(new int16());
-        methods.add(new float32());
-        methods.add(new utf8());
+        // SHIFT + U for UTF-8
+        methods.add(new utf8(KeyEvent.VK_U, 0));
+        // SHIFT + I for int16
+        methods.add(new int16(KeyEvent.VK_I, 0));
+        // SHIFT + CTRL + I for uint16
+        methods.add(new uint16(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
+        // SHIFT + F for float32
+        methods.add(new float32(KeyEvent.VK_F, 0));
+        // SHIFT + CTRL + F for float64
+        methods.add(new float64(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK));
         return methods;
     }
 
     public static class int16 extends InterpMethod {
 
-            public int16() {
-                super("int16");
+            public int16(int keycode, int mod) {
+                super("int16", keycode, mod);
 
                 this.setInterpreter((stuff, endianess) -> {
                     StringBuilder sb = new StringBuilder();
@@ -69,8 +103,8 @@ public class InterpMethod {
 
     public static class uint16 extends InterpMethod {
 
-        public uint16() {
-            super("uint16");
+        public uint16(int keycode, int mod) {
+            super("uint16", keycode, mod);
 
             this.setInterpreter((stuff, endianess) -> {
                 StringBuilder sb = new StringBuilder();
@@ -100,8 +134,8 @@ public class InterpMethod {
     }
 
     public static class utf8 extends InterpMethod {
-        public utf8() {
-            super("UTF-8");
+        public utf8(int keycode, int mod) {
+            super("UTF-8", keycode, mod);
             this.setInterpreter(
                     (stuff, endianess) -> {
                         // UTF-8 doesn't care about endianess for individual bytes, but for multibyte characters
@@ -114,26 +148,75 @@ public class InterpMethod {
     }
 
     public static class float32 extends InterpMethod {
-        public float32() {
-            super("float32");
+        public float32(int keycode, int mod) {
+            super("float32", keycode, mod);
             this.setInterpreter(
                     (stuff, endianess) -> {
-                        if (stuff.length != 4) {
-                            return "N/A (requires 4 bytes)";
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < stuff.length; i += 4) {
+                            if (i + 3 >= stuff.length) {
+                                sb.append("? ");
+                                break;
+                            }
+                            int intValue = getBits(stuff, endianess, i);
+                            sb.append(intValue).append(" ");
                         }
-                        int intBits;
-                        if (endianess == Endianess.BIG) {
-                            intBits = ((stuff[0] & 0xFF) << 24) |
-                                    ((stuff[1] & 0xFF) << 16) |
-                                    ((stuff[2] & 0xFF) << 8) |
-                                    (stuff[3] & 0xFF);
-                        } else { // LITTLE
-                            intBits = ((stuff[3] & 0xFF) << 24) |
-                                    ((stuff[2] & 0xFF) << 16) |
-                                    ((stuff[1] & 0xFF) << 8) |
-                                    (stuff[0] & 0xFF);
+                        return sb.toString().trim();
+                    }
+            );
+        }
+
+        private static int getBits(byte[] stuff, Endianess endianess, int i) {
+            int intBits;
+            if (endianess == Endianess.BIG) {
+                intBits = ((stuff[i] & 0xFF) << 24) |
+                        ((stuff[i + 1] & 0xFF) << 16) |
+                        ((stuff[i + 2] & 0xFF) << 8) |
+                        (stuff[i + 3] & 0xFF);
+            } else { // LITTLE
+                intBits = ((stuff[i + 3] & 0xFF) << 24) |
+                        ((stuff[i + 2] & 0xFF) << 16) |
+                        ((stuff[i + 1] & 0xFF) << 8) |
+                        (stuff[i] & 0xFF);
+            }
+            return intBits;
+        }
+    }
+
+    public static class float64 extends InterpMethod {
+        public float64(int keycode, int mod) {
+            super("float64", keycode, mod);
+            this.setInterpreter(
+                    (stuff, endianess) -> {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < stuff.length; i += 8) {
+                            if (i + 7 >= stuff.length) {
+                                sb.append("? ");
+                                break;
+                            }
+                            long longBits;
+                            if (endianess == Endianess.BIG) {
+                                longBits = ((long)(stuff[i] & 0xFF) << 56) |
+                                        ((long)(stuff[i + 1] & 0xFF) << 48) |
+                                        ((long)(stuff[i + 2] & 0xFF) << 40) |
+                                        ((long)(stuff[i + 3] & 0xFF) << 32) |
+                                        ((long)(stuff[i + 4] & 0xFF) << 24) |
+                                        ((long)(stuff[i + 5] & 0xFF) << 16) |
+                                        ((long)(stuff[i + 6] & 0xFF) << 8) |
+                                        ((long)(stuff[i + 7] & 0xFF));
+                            } else { // LITTLE
+                                longBits = ((long)(stuff[i + 7] & 0xFF) << 56) |
+                                        ((long)(stuff[i + 6] & 0xFF) << 48) |
+                                        ((long)(stuff[i + 5] & 0xFF) << 40) |
+                                        ((long)(stuff[i + 4] & 0xFF) << 32) |
+                                        ((long)(stuff[i + 3] & 0xFF) << 24) |
+                                        ((long)(stuff[i + 2] & 0xFF) << 16) |
+                                        ((long)(stuff[i + 1] & 0xFF) << 8) |
+                                        ((long)(stuff[i] & 0xFF));
+                            }
+                            sb.append(Double.longBitsToDouble(longBits)).append(" ");
                         }
-                        return String.valueOf(Float.intBitsToFloat(intBits));
+                        return sb.toString().trim();
                     }
             );
         }

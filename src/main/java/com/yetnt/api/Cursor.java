@@ -5,6 +5,7 @@ import javax.swing.*;
 public class Cursor {
     private int byteIndex = 0;
     private int maxValue;
+    private JSpinner spinner;
 
     public Cursor(){}
     public Cursor(int maxValue, JSpinner spinner) {
@@ -13,11 +14,14 @@ public class Cursor {
         SpinnerNumberModel model = new SpinnerNumberModel(0, 0, maxValue, 1);
         spinner.setModel(model);
         spinner.setValue(0);
+        this.spinner = spinner;
     }
 
     public Cursor setByteIndex(int byteIndex) {
-        if (byteIndex >= 0 && byteIndex < maxValue)
+        if (byteIndex >= 0 && byteIndex < maxValue) {
             this.byteIndex = byteIndex;
+            spinner.setValue(byteIndex);
+        }
         return this;
     }
 
@@ -26,14 +30,18 @@ public class Cursor {
     }
 
     public Cursor incrementByte() {
-        if (byteIndex != maxValue)
+        if (byteIndex != maxValue) {
             byteIndex++;
+            spinner.setValue(byteIndex);
+        }
         return this;
     }
 
     public Cursor decrementByte() {
-        if (byteIndex != 0)
+        if (byteIndex != 0) {
             byteIndex--;
+            spinner.setValue(byteIndex);
+        }
         return this;
     }
 

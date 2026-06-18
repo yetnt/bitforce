@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        Path filePath = Paths.get("C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\bootsamsung.qmg");
+        Path filePath = Paths.get("C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\def.j3p");
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

@@ -11,38 +11,42 @@ public class Converter {
     public boolean showSelection = true;
     public boolean showByteIndexes = true;
 
-    private int maxByteIndex = 300;
+    private int maxByteIndex = 1;
     private int minByteIndex = 0;
-    public int maxViewIndex = 300;
 
     public Converter() {}
 
     public void setMaxByteIndex(int maxByteIndex) {
-        if (maxByteIndex < 0) return;
+        if (maxByteIndex < 0 || maxByteIndex < minByteIndex) return;
         this.maxByteIndex = maxByteIndex;
-        this.minByteIndex = Math.max(maxByteIndex - maxViewIndex - 1, 0);
     }
 
-    public void setMaxViewIndex(int maxViewIndex) {
-        if (maxViewIndex <= 1) return;
-        this.maxViewIndex = maxViewIndex;
-        this.minByteIndex = Math.max(maxByteIndex - maxViewIndex - 1, 0);
+    public void setMinByteIndex(int minByteIndex) {
+        if (minByteIndex < 0 || minByteIndex > maxByteIndex) return;
+        this.minByteIndex = minByteIndex;
     }
 
     public int getMaxByteIndex() {
         return maxByteIndex;
     }
 
-    public int getMaxViewIndex() {
-        return maxViewIndex;
+    public int getMinByteIndex() {
+        return minByteIndex;
     }
 
     public byte[] bytesSlice(byte[] bytes) {
         if (bytes.length <= maxByteIndex) return bytes;
-        byte[] subArray = new byte[Math.max(maxByteIndex, maxViewIndex)+1 - minByteIndex];
+        byte[] subArray = new byte[maxByteIndex - minByteIndex];
         System.arraycopy(bytes, minByteIndex, subArray, 0, subArray.length);
         return subArray;
     }
+
+//    public byte[] bytesSlice(byte[] bytes) {
+//        if (bytes.length <= maxByteIndex) return bytes;
+//        byte[] subArray = new byte[Math.max(maxByteIndex + 1, maxViewIndex) - minByteIndex];
+//        System.arraycopy(bytes, minByteIndex, subArray, 0, subArray.length);
+//        return subArray;
+//    }
 
     public JLabelRichText[] conv(byte[] bytes, Cursor start, Cursor end) {
         byte[] sliced = bytesSlice(bytes);
@@ -56,7 +60,7 @@ public class Converter {
             StringBuilder bView = new StringBuilder();
             if (showByteIndexes) {
                 bView.append(
-                        new JLabelRichText("(" + (minByteIndex + i) + ".)")
+                        new JLabelRichText((minByteIndex + i) + ".")
                                 .font(Color.GRAY, "3")
                 );
                 charLength += 2;
@@ -67,10 +71,10 @@ public class Converter {
                         case BIN -> String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0').toCharArray();
                     }));
             if (showSelection && byteSelected(bytes, i + minByteIndex, start, end))
-                inner.font(Color.RED, "6", Color.GREEN);
+                inner.font(Color.RED, "6", new Color(201, 232, 177)).italic();
             else
-                inner.font(Color.RED, "6");
-            bView.append(inner.bold().italic());
+                inner.font(Color.BLACK, "6");
+            bView.append(inner.bold());
 
             charLength += inner.getRawContent().length();
             charsInLn += charLength;
