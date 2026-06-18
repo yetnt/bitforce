@@ -16,7 +16,7 @@ public class Main {
      * The name of this, is intentionally long.
      * My code, my rules.
      */
-    public static String HARD_CODED_PATH_TO_MY_TEST_FILE = "C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\def.j3p";
+    public static String HARD_CODED_PATH_TO_MY_TEST_FILE = "C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\gq33.wav";
 
     public static void main(String[] args) {
         Path filePath;

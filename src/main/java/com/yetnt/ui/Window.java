@@ -5,6 +5,7 @@
 package com.yetnt.ui;
 
 import com.yetnt.JLabelRichText;
+import com.yetnt.MathUtil;
 import com.yetnt.api.CharGroups;
 import com.yetnt.api.Cursor;
 import com.yetnt.api.View;
@@ -34,6 +35,7 @@ public class Window extends javax.swing.JFrame {
     public static ArrayList<InterpMethod> methods  = InterpMethod.getMethods();
     private InterpretedLabel interpLabelFrame = new InterpretedLabel();
     private Cursor selectedCursor;
+    private int value2n = 4;
 
     /**
      * Creates new form Window
@@ -210,6 +212,68 @@ public class Window extends javax.swing.JFrame {
     private void byteRangeNote() {
         note("Showing byte range: [" + converter.getMinByteIndex() + "; " + converter.getMaxByteIndex() + ")");
     }
+    private void setValue2n() {
+        String option = JOptionPane.showInputDialog(this,
+                JLabelRichText.paragraphWrap(
+                        new JLabelRichText("Enter a valid power of 2 (1, 2, 4, 8, 16...) or \"2^n\" like (2^3)"),
+                        new JLabelRichText(JLabelRichText.LINE_BREAK + "[Or leave blank to use the old value of " + value2n + "]")
+                ).wrapHTML(),
+                JOptionPane.INFORMATION_MESSAGE
+        );
+        if (option == null)
+            return;
+        option = option.trim();
+        if (option.isEmpty())
+            return;
+        int newNum = 0;
+        try {
+            newNum = Integer.parseInt(option.startsWith("2^") ?
+                    option.substring(2) :  option);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(
+                    this, "Twin. Put a number twin.",
+                    "Error", JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        if (option.startsWith("2^")) {
+            value2n = (int) Math.pow(2, newNum);
+            note("Byte Jump set to " + value2n + ".");
+            return;
+        }
+
+        if (!MathUtil.isValid2nInput(newNum)) {
+            JOptionPane.showMessageDialog(
+                    this, "Twin. Put thats not a powr of 2 twin.",
+                    "Error", JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        value2n = newNum;
+        note("Byte Jump set to " + value2n + ".");
+    }
+    private void _selected2nUp() {
+        int oldIndex = selectedCursor.getByteIndex();
+        selectedCursor.snap2nUp(value2n);
+        note(
+                "Cursor " + (selectedCursor == start ? 1 : 2) + " jumped from byte "
+                        + oldIndex + " to byte " + selectedCursor.getByteIndex() + "."
+                        + (selectedCursor == start ? "(inclusive)" : "(exclusive)")
+        );
+        print();
+    }
+    private void _selected2nDown() {
+        int oldIndex = selectedCursor.getByteIndex();
+        selectedCursor.snap2nDown(value2n);
+        note(
+                "Cursor " + (selectedCursor == start ? 1 : 2) + " jumped from byte "
+                + oldIndex + " to byte " + selectedCursor.getByteIndex() + "."
+                + (selectedCursor == start ? "(inclusive)" : "(exclusive)")
+        );
+        print();
+    }
 
     /**
      * This method is called from within the constructor to initialise the form.
@@ -280,7 +344,11 @@ public class Window extends javax.swing.JFrame {
         selectCursor2MenuItem = new javax.swing.JMenuItem();
         nextByteMenuItem = new javax.swing.JMenuItem();
         previousByteMenuItem = new javax.swing.JMenuItem();
-        applyLastUsed2nOperationMenuItem = new javax.swing.JMenuItem();
+        jMenu11 = new javax.swing.JMenu();
+        set2nValueMenuItem = new javax.swing.JMenuItem();
+        nextBytesMenuItem = new javax.swing.JMenuItem();
+        previousBytesMenuItem = new javax.swing.JMenuItem();
+        teleportMenuItem = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
         binaryViewMenuItem = new javax.swing.JMenuItem();
         hexViewMenuItem = new javax.swing.JMenuItem();
@@ -289,6 +357,7 @@ public class Window extends javax.swing.JFrame {
         grouped2menuItem = new javax.swing.JMenuItem();
         grouped4menuitem = new javax.swing.JMenuItem();
         jMenu8 = new javax.swing.JMenu();
+        setViewAroundCursorMenuItem = new javax.swing.JMenuItem();
         showAllBytesMenuItem = new javax.swing.JMenuItem();
         first100BytesMenuItem = new javax.swing.JMenuItem();
         last100BytesMenuItem = new javax.swing.JMenuItem();
@@ -761,14 +830,45 @@ public class Window extends javax.swing.JFrame {
         });
         jMenu3.add(previousByteMenuItem);
 
-        applyLastUsed2nOperationMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, 0));
-        applyLastUsed2nOperationMenuItem.setText("Last Used 2^n Operation");
-        applyLastUsed2nOperationMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        jMenu11.setText("2^nth Byte Snapping");
+
+        set2nValueMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_BACK_SLASH, 0));
+        set2nValueMenuItem.setText("Set 2^n Value");
+        set2nValueMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                applyLastUsed2nOperationMenuItemActionPerformed(evt);
+                set2nValueMenuItemActionPerformed(evt);
             }
         });
-        jMenu3.add(applyLastUsed2nOperationMenuItem);
+        jMenu11.add(set2nValueMenuItem);
+
+        nextBytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_CLOSE_BRACKET, 0));
+        nextBytesMenuItem.setText("Next Bytes");
+        nextBytesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextBytesMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu11.add(nextBytesMenuItem);
+
+        previousBytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_OPEN_BRACKET, 0));
+        previousBytesMenuItem.setText("Previous Bytes");
+        previousBytesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                previousBytesMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu11.add(previousBytesMenuItem);
+
+        jMenu3.add(jMenu11);
+
+        teleportMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_SLASH, 0));
+        teleportMenuItem.setText("Teleport Cursor To Byte");
+        teleportMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                teleportMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu3.add(teleportMenuItem);
 
         jMenuBar1.add(jMenu3);
 
@@ -824,6 +924,15 @@ public class Window extends javax.swing.JFrame {
         jMenu4.add(jMenu7);
 
         jMenu8.setText("Viewable Bytes");
+
+        setViewAroundCursorMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_SLASH, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        setViewAroundCursorMenuItem.setText("Set View Around Cursor");
+        setViewAroundCursorMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setViewAroundCursorMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu8.add(setViewAroundCursorMenuItem);
 
         showAllBytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         showAllBytesMenuItem.setText("Show All Bytes");
@@ -954,7 +1063,7 @@ public class Window extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(mainControlsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(viewerScrollpane, javax.swing.GroupLayout.PREFERRED_SIZE, 504, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
@@ -1012,11 +1121,13 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_selectionCheckBoxActionPerformed
 
     private void next2nBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_next2nBtnActionPerformed
-        // TODO add your handling code here:
+        setValue2n();
+        _selected2nUp();
     }//GEN-LAST:event_next2nBtnActionPerformed
 
     private void previous2nBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previous2nBtnActionPerformed
-        // TODO add your handling code here:
+        setValue2n();
+        _selected2nDown();
     }//GEN-LAST:event_previous2nBtnActionPerformed
 
     private void nextByteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextByteBtnActionPerformed
@@ -1072,9 +1183,9 @@ public class Window extends javax.swing.JFrame {
         _incrementSelectedCursor();
     }//GEN-LAST:event_nextByteMenuItemActionPerformed
 
-    private void applyLastUsed2nOperationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyLastUsed2nOperationMenuItemActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_applyLastUsed2nOperationMenuItemActionPerformed
+    private void set2nValueMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_set2nValueMenuItemActionPerformed
+        setValue2n();
+    }//GEN-LAST:event_set2nValueMenuItemActionPerformed
 
     private void grouped2menuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grouped2menuItemActionPerformed
         _changegrouping(CharGroups.DOUBLE);
@@ -1153,6 +1264,51 @@ public class Window extends javax.swing.JFrame {
         byteRangeNote();
     }//GEN-LAST:event_plusMaxMenuItemActionPerformed
 
+    private void nextBytesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextBytesMenuItemActionPerformed
+        _selected2nUp();
+    }//GEN-LAST:event_nextBytesMenuItemActionPerformed
+
+    private void previousBytesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousBytesMenuItemActionPerformed
+        _selected2nDown();
+    }//GEN-LAST:event_previousBytesMenuItemActionPerformed
+
+    private void teleportMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_teleportMenuItemActionPerformed
+        String num = JOptionPane.showInputDialog(
+                this,
+                "Teleport " + (selectedCursor == start ? 1 : 2) + " to byte...",
+                "Teleport",
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (num == null)
+            return;
+        try {
+            int byteIndex = Integer.parseInt(num);
+            if (byteIndex < 0 || byteIndex >= bytes.length) {
+                JOptionPane.showMessageDialog(this, "Too far man.",
+                        "Out of bounds", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            selectedCursor.setByteIndex(byteIndex);
+            note(
+                    "Cursor " + (selectedCursor == start? 1 : 2) + " has been sent to byte " +
+                            selectedCursor.getByteIndex() + "."
+            );
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Thats just not a number",
+                    "Invalid Input", JOptionPane.ERROR_MESSAGE);
+        }
+        print();
+    }//GEN-LAST:event_teleportMenuItemActionPerformed
+
+    private void setViewAroundCursorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setViewAroundCursorMenuItemActionPerformed
+        int newMin = Math.max(0, selectedCursor.getByteIndex() - 100);
+        int newMax = Math.min(bytes.length - 1, selectedCursor.getByteIndex() + 100);
+        _setMinValue(newMin);
+        _setMaxValue(newMax);
+        print();
+        byteRangeNote();
+    }//GEN-LAST:event_setViewAroundCursorMenuItemActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1189,7 +1345,6 @@ public class Window extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem applyLastUsed2nOperationMenuItem;
     private javax.swing.JRadioButton bigEdianRadio;
     private javax.swing.JMenuItem binaryViewMenuItem;
     private javax.swing.JRadioButton bitViewRadio;
@@ -1221,6 +1376,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu10;
+    private javax.swing.JMenu jMenu11;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
@@ -1254,6 +1410,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JButton next2nBtn;
     private javax.swing.JButton nextByteBtn;
     private javax.swing.JMenuItem nextByteMenuItem;
+    private javax.swing.JMenuItem nextBytesMenuItem;
     private javax.swing.JLabel noteLabel;
     private javax.swing.JMenuItem openInterpWindowMenuItem;
     private javax.swing.JMenuItem plus100BytesMenuItem;
@@ -1263,13 +1420,17 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JButton previous2nBtn;
     private javax.swing.JButton previousByteBtn;
     private javax.swing.JMenuItem previousByteMenuItem;
+    private javax.swing.JMenuItem previousBytesMenuItem;
     private javax.swing.JButton saveInterpBtn;
     private javax.swing.JMenuItem selectCursor1MenuItem;
     private javax.swing.JMenuItem selectCursor2MenuItem;
     private javax.swing.JCheckBox selectionCheckBox;
+    private javax.swing.JMenuItem set2nValueMenuItem;
+    private javax.swing.JMenuItem setViewAroundCursorMenuItem;
     private javax.swing.JMenuItem showAllBytesMenuItem;
     private javax.swing.JMenuItem singularMenuItem;
     private javax.swing.JRadioButton singularRadio;
+    private javax.swing.JMenuItem teleportMenuItem;
     private javax.swing.JLabel viewerLabel;
     private javax.swing.JScrollPane viewerScrollpane;
     // End of variables declaration//GEN-END:variables

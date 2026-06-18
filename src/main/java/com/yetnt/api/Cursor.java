@@ -1,5 +1,7 @@
 package com.yetnt.api;
 
+import com.yetnt.MathUtil;
+
 import javax.swing.*;
 
 /**
@@ -78,9 +80,12 @@ public class Cursor {
      * @param p The multiple to snap to.
      */
     public void snap2nUp(int p) {
-        int newIndex =
-                (int) Math.ceil((double) byteIndex/p ) * p;
-        setByteIndex(newIndex);
+        int q = MathUtil.snapToBoundary(p, MathUtil.Boundary.HIGH, byteIndex);
+        setByteIndex(
+                byteIndex == q ?
+                        MathUtil.snapToBoundary(p, MathUtil.Boundary.HIGH, byteIndex + 1) :
+                        q
+        );
     }
 
     /**
@@ -89,9 +94,12 @@ public class Cursor {
      * @param p The multiple to snap to.
      */
     public void snap2nDown(int p) {
-        int newIndex =
-                (int) Math.floor( (double) byteIndex/p ) * p;
-        setByteIndex(newIndex);
+        int q = MathUtil.snapToBoundary(p, MathUtil.Boundary.LOW, byteIndex);
+        setByteIndex(
+                byteIndex == q ?
+                        MathUtil.snapToBoundary(p, MathUtil.Boundary.LOW, byteIndex - 1) :
+                        q
+        );
     }
 
     /**
