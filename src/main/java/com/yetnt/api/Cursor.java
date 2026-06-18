@@ -2,7 +2,15 @@ package com.yetnt.api;
 
 import javax.swing.*;
 
+/**
+ * A class representing a cursor that points to a specific byte index within a byte array.
+ * It manages the byte index, its maximum value, and interacts with a {@link JSpinner} to reflect and update the index in a UI.
+ * @author Lehlogonolo Poole
+ */
 public class Cursor {
+    /**
+     * The current byte index.
+     */
     private int byteIndex = 0;
     private int maxValue;
     private JSpinner spinner;
@@ -17,6 +25,11 @@ public class Cursor {
         this.spinner = spinner;
     }
 
+    /**
+     * Sets the current byte index.
+     * @param byteIndex The new byte index.
+     * @return The Cursor object for chaining.
+     */
     public Cursor setByteIndex(int byteIndex) {
         if (byteIndex >= 0 && byteIndex < maxValue) {
             this.byteIndex = byteIndex;
@@ -25,10 +38,19 @@ public class Cursor {
         return this;
     }
 
+    /**
+     * Gets the current byte index.
+     * @return The current byte index.
+     */
     public int getByteIndex() {
         return byteIndex;
     }
 
+    /**
+     * Increments the byte index by one, if it's not already at the maximum value.
+     * The spinner value is also updated.
+     * @return The Cursor object for chaining.
+     */
     public Cursor incrementByte() {
         if (byteIndex != maxValue) {
             byteIndex++;
@@ -37,6 +59,11 @@ public class Cursor {
         return this;
     }
 
+    /**
+     * Decrements the byte index by one, if it's not already at zero.
+     * The spinner value is also updated.
+     * @return The Cursor object for chaining.
+     */
     public Cursor decrementByte() {
         if (byteIndex != 0) {
             byteIndex--;
@@ -45,18 +72,35 @@ public class Cursor {
         return this;
     }
 
+    /**
+     * Snaps the current byte index up to the nearest multiple of 'p'.
+     * For example, if byteIndex is 7 and p is 4, newIndex will be 8.
+     * @param p The multiple to snap to.
+     */
     public void snap2nUp(int p) {
         int newIndex =
                 (int) Math.ceil((double) byteIndex/p ) * p;
         setByteIndex(newIndex);
     }
 
+    /**
+     * Snaps the current byte index down to the nearest multiple of 'p'.
+     * For example, if byteIndex is 7 and p is 4, newIndex will be 4.
+     * @param p The multiple to snap to.
+     */
     public void snap2nDown(int p) {
         int newIndex =
                 (int) Math.floor( (double) byteIndex/p ) * p;
         setByteIndex(newIndex);
     }
 
+    /**
+     * Extracts a sub-array of bytes from a given byte array based on the start and end cursor positions.
+     * @param start The starting Cursor, inclusive.
+     * @param end The ending Cursor, exclusive.
+     * @param bytes The original byte array to extract from.
+     * @return A new byte array containing the selected bytes, or an empty array if the selection is invalid.
+     */
     public static byte[] bytes(Cursor start, Cursor end, byte[] bytes) {
         if (start.getByteIndex() == end.getByteIndex()) {
             // no byte selected

@@ -4,9 +4,14 @@ import com.yetnt.JLabelRichText;
 
 import java.awt.*;
 
+/**
+ * The Converter class is responsible for converting byte arrays into a displayable format,
+ * typically for a rich text label, with various customisation options.
+ * @author Lehlogonolo Poole
+ */
 public class Converter {
 
-    public Grouping grouping = Grouping.SINGULAR;
+    public CharGroups charGroups = CharGroups.SINGULAR;
     public View view = View.BIN;
     public boolean showSelection = true;
     public boolean showByteIndexes = true;
@@ -14,26 +19,56 @@ public class Converter {
     private int maxByteIndex = 1;
     private int minByteIndex = 0;
 
+    /**
+     * Constructs a new Converter with default settings.
+     */
     public Converter() {}
 
+    /**
+     * Sets the maximum byte index for the slice.
+     * The maximum byte index must be non-negative and not less than the minimum byte index.
+     *
+     * @param maxByteIndex The new maximum byte index.
+     */
     public void setMaxByteIndex(int maxByteIndex) {
         if (maxByteIndex < 0 || maxByteIndex < minByteIndex) return;
         this.maxByteIndex = maxByteIndex;
     }
 
+    /**
+     * Sets the minimum byte index for the slice.
+     * The minimum byte index must be non-negative and not greater than the maximum byte index.
+     *
+     * @param minByteIndex The new minimum byte index.
+     */
     public void setMinByteIndex(int minByteIndex) {
         if (minByteIndex < 0 || minByteIndex > maxByteIndex) return;
         this.minByteIndex = minByteIndex;
     }
 
+    /**
+     * Returns the current maximum byte index.
+     * @return The maximum byte index.
+     */
     public int getMaxByteIndex() {
         return maxByteIndex;
     }
 
+    /**
+     * Returns the current minimum byte index.
+     * @return The minimum byte index.
+     */
     public int getMinByteIndex() {
         return minByteIndex;
     }
 
+    /**
+     * Slices a byte array based on the current {@code minByteIndex} and {@code maxByteIndex}.
+     * If the array length is less than or equal to {@code maxByteIndex}, the original array is returned.
+     *
+     * @param bytes The input byte array.
+     * @return A new byte array representing the slice.
+     */
     public byte[] bytesSlice(byte[] bytes) {
         if (bytes.length <= maxByteIndex) return bytes;
         byte[] subArray = new byte[maxByteIndex - minByteIndex];
@@ -41,13 +76,15 @@ public class Converter {
         return subArray;
     }
 
-//    public byte[] bytesSlice(byte[] bytes) {
-//        if (bytes.length <= maxByteIndex) return bytes;
-//        byte[] subArray = new byte[Math.max(maxByteIndex + 1, maxViewIndex) - minByteIndex];
-//        System.arraycopy(bytes, minByteIndex, subArray, 0, subArray.length);
-//        return subArray;
-//    }
-
+    /**
+     * Converts a byte array into an array of {@link JLabelRichText} objects,
+     * applying various formatting and display options.
+     *
+     * @param bytes The byte array to convert.
+     * @param start The starting cursor for selection highlighting.
+     * @param end The ending cursor for selection highlighting.
+     * @return An array of {@link JLabelRichText} objects representing the formatted bytes.
+     */
     public JLabelRichText[] conv(byte[] bytes, Cursor start, Cursor end) {
         byte[] sliced = bytesSlice(bytes);
         JLabelRichText []txts = new JLabelRichText[sliced.length];
@@ -91,17 +128,39 @@ public class Converter {
         return txts;
     }
 
+    /**
+     * Checks if a specific byte at a given index is within the selected range.
+     * The start cursor is inclusive, and the end cursor is exclusive.
+     *
+     * @param bytes The byte array (unused in the current implementation, but kept for context).
+     * @param index The index of the byte to check.
+     * @param start The starting cursor of the selection.
+     * @param end The ending cursor of the selection.
+     * @return {@code true} if the byte is selected, {@code false} otherwise.
+     */
     public boolean byteSelected(byte[] bytes, int index, Cursor start, Cursor end) {
         // start is inclusive, end is exclusive.
         return start.getByteIndex() <= index && index < end.getByteIndex();
     }
 
+    /**
+     * Applies charGroups to a character array based on the current {@code charGroups} setting.
+     * @param chars The character array to group.
+     * @return A string with the characters grouped.
+     */
     public String applyGrouping(char[] chars) {
-        return switch (grouping) {
-            case SINGULAR, DOUBLE, QUAD -> applyGroupingInternal(chars, grouping.getN());
+        return switch (charGroups) {
+            case SINGULAR, DOUBLE, QUAD -> applyGroupingInternal(chars, charGroups.getN());
         };
     }
 
+    /**
+     * Internal helper method to apply charGroups to a character array.
+     *
+     * @param chars The character array to group.
+     * @param groupSize The size of each group.
+     * @return A string with the characters grouped and separated by spaces.
+     */
     private String applyGroupingInternal(char[] chars, int groupSize) {
         StringBuilder output = new StringBuilder();
         for (int i = 0; i < chars.length; i += groupSize) {

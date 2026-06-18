@@ -11,8 +11,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Main {
+
+    /**
+     * The name of this, is intentionally long.
+     * My code, my rules.
+     */
+    public static String HARD_CODED_PATH_TO_MY_TEST_FILE = "C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\def.j3p";
+
     public static void main(String[] args) {
-        Path filePath = Paths.get("C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\def.j3p");
+        Path filePath;
+        if (args.length == 0) filePath = Paths.get(HARD_CODED_PATH_TO_MY_TEST_FILE);
+        else filePath = Paths.get(args[0]);
+        if (!filePath.toFile().exists()) {
+            System.out.println("So like i cant find " + filePath.toAbsolutePath());
+            return;
+        }
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

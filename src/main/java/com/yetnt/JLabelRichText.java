@@ -7,6 +7,11 @@ import java.util.Arrays;
 /**
  * A utility class for creating rich text content suitable for display in Swing's JLabel.
  * It allows chaining methods to apply various HTML-like formatting to a given string.
+ * <p>
+ *     Proudly stolen from my custom, CPU & Swing only 3D engine project
+ *     <a href="https://github.com/yetnt/j3engine">J3Engine</a>. However this adapts it to
+ *     add the {@link #font(Color, String, Color)} overload.
+ * </p>
  */
 public class JLabelRichText {
     private String content;

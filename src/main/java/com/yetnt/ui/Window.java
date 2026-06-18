@@ -5,8 +5,8 @@
 package com.yetnt.ui;
 
 import com.yetnt.JLabelRichText;
+import com.yetnt.api.CharGroups;
 import com.yetnt.api.Cursor;
-import com.yetnt.api.Grouping;
 import com.yetnt.api.View;
 import com.yetnt.api.Converter;
 import com.yetnt.methods.Endianess;
@@ -187,9 +187,9 @@ public class Window extends javax.swing.JFrame {
         converter.view = view;
         print();
     }
-    private void _changegrouping(Grouping g) {
-        note("Changed grouping to " + g.name());
-        converter.grouping = g;
+    private void _changegrouping(CharGroups g) {
+        note("Changed charGroups to " + g.name());
+        converter.charGroups = g;
         print();
     }
     private void _incrementSelectedCursor() {
@@ -990,15 +990,15 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_byteViewRadio1ActionPerformed
 
     private void singularRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singularRadioActionPerformed
-        _changegrouping(Grouping.SINGULAR);
+        _changegrouping(CharGroups.SINGULAR);
     }//GEN-LAST:event_singularRadioActionPerformed
 
     private void group2RadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_group2RadioActionPerformed
-        _changegrouping(Grouping.DOUBLE);
+        _changegrouping(CharGroups.DOUBLE);
     }//GEN-LAST:event_group2RadioActionPerformed
 
     private void group4RadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_group4RadioActionPerformed
-        _changegrouping(Grouping.QUAD);
+        _changegrouping(CharGroups.QUAD);
     }//GEN-LAST:event_group4RadioActionPerformed
 
     private void byteIndexCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_byteIndexCheckBoxActionPerformed
@@ -1050,7 +1050,7 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_hexViewMenuItemActionPerformed
 
     private void singularMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singularMenuItemActionPerformed
-        _changegrouping(Grouping.SINGULAR);
+        _changegrouping(CharGroups.SINGULAR);
         singularRadio.setSelected(true);
     }//GEN-LAST:event_singularMenuItemActionPerformed
 
@@ -1077,12 +1077,12 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_applyLastUsed2nOperationMenuItemActionPerformed
 
     private void grouped2menuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grouped2menuItemActionPerformed
-        _changegrouping(Grouping.DOUBLE);
+        _changegrouping(CharGroups.DOUBLE);
         group2Radio.setSelected(true);
     }//GEN-LAST:event_grouped2menuItemActionPerformed
 
     private void grouped4menuitemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grouped4menuitemActionPerformed
-        _changegrouping(Grouping.QUAD);
+        _changegrouping(CharGroups.QUAD);
         group4Radio.setSelected(true);
     }//GEN-LAST:event_grouped4menuitemActionPerformed
 
