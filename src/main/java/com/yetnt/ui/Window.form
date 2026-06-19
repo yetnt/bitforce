@@ -14,7 +14,7 @@
     </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
-        <Menu class="javax.swing.JMenu" name="jMenu1">
+        <Menu class="javax.swing.JMenu" name="fileJMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="File"/>
           </Properties>
@@ -26,15 +26,18 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Load FIel"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="loadFileMenuItemActionPerformed"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu2">
+        <Menu class="javax.swing.JMenu" name="editJMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="Edit"/>
           </Properties>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu3">
+        <Menu class="javax.swing.JMenu" name="curorJMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="Cursors"/>
           </Properties>
@@ -83,7 +86,7 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="previousByteMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <Menu class="javax.swing.JMenu" name="jMenu11">
+            <Menu class="javax.swing.JMenu" name="snap2nByteJMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="2^nth Byte Snapping"/>
               </Properties>
@@ -136,7 +139,7 @@
             </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu4">
+        <Menu class="javax.swing.JMenu" name="viewJMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="View"/>
           </Properties>
@@ -163,7 +166,7 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="hexViewMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <Menu class="javax.swing.JMenu" name="jMenu7">
+            <Menu class="javax.swing.JMenu" name="charGroupingJMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Character Grouping"/>
               </Properties>
@@ -203,7 +206,7 @@
                 </MenuItem>
               </SubComponents>
             </Menu>
-            <Menu class="javax.swing.JMenu" name="jMenu8">
+            <Menu class="javax.swing.JMenu" name="viewByteJMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Viewable Bytes"/>
               </Properties>
@@ -274,7 +277,7 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="minus100BytesMenuItemActionPerformed"/>
                   </Events>
                 </MenuItem>
-                <Menu class="javax.swing.JMenu" name="jMenu9">
+                <Menu class="javax.swing.JMenu" name="minIndexJMenu">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Min Index"/>
                   </Properties>
@@ -303,7 +306,7 @@
                     </MenuItem>
                   </SubComponents>
                 </Menu>
-                <Menu class="javax.swing.JMenu" name="jMenu10">
+                <Menu class="javax.swing.JMenu" name="maxIndexJMenu">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Max Index"/>
                   </Properties>
@@ -336,12 +339,12 @@
             </Menu>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu5">
+        <Menu class="javax.swing.JMenu" name="interpJMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="Interpretation"/>
           </Properties>
           <SubComponents>
-            <Menu class="javax.swing.JMenu" name="jMenu6">
+            <Menu class="javax.swing.JMenu" name="methodJMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Methods"/>
               </Properties>
@@ -386,9 +389,9 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Component id="mainControlsPanel" alignment="0" max="32767" attributes="0"/>
-                  <Component id="viewerScrollpane" alignment="0" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="mainControlsPanel" max="32767" attributes="0"/>
+                  <Component id="viewerScrollpane" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
@@ -403,8 +406,8 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <Component id="mainControlsPanel" max="32767" attributes="0"/>
-              <EmptySpace type="unrelated" max="32767" attributes="0"/>
-              <Component id="viewerScrollpane" min="-2" pref="504" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="viewerScrollpane" min="-2" pref="512" max="-2" attributes="0"/>
           </Group>
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
@@ -453,7 +456,7 @@
                       <Component id="selectionCheckBox" min="-2" pref="84" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
+                  <Component id="seperatorLeft" min="-2" pref="10" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
@@ -475,8 +478,8 @@
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jSeparator2" min="-2" pref="10" max="-2" attributes="0"/>
-                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="seperatorRight" min="-2" pref="10" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="nextByteBtn" min="-2" max="-2" attributes="0"/>
                       <Component id="previousByteBtn" min="-2" pref="79" max="-2" attributes="0"/>
@@ -494,13 +497,13 @@
                           <Component id="minByteIndexSpinner" max="32767" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
-                          <Component id="jLabel1" min="-2" pref="66" max="-2" attributes="0"/>
+                          <Component id="maxUbdexLabel" min="-2" pref="66" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                          <Component id="minIndexLabel" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -509,57 +512,55 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="curs1IndexSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="cursor1" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="byteIndexCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="curs2IndexSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="cursor2" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="selectionCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
-                              <Group type="102" attributes="0">
-                                  <Component id="interpretedLabel" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="saveInterpBtn" alignment="3" min="-2" pref="17" max="-2" attributes="0"/>
-                                      <Component id="listInterpBtn" alignment="3" min="-2" pref="17" max="-2" attributes="0"/>
-                                      <Component id="loadInterpBtn" alignment="3" min="-2" pref="17" max="-2" attributes="0"/>
-                                      <Component id="ponderInterpBtn" alignment="3" min="-2" pref="17" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
-                          </Group>
-                          <EmptySpace max="32767" attributes="0"/>
-                          <Component id="noteLabel" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
-                      <Component id="jSeparator2" alignment="0" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="nextByteBtn" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="next2nBtn" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="curs1IndexSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="cursor1" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="byteIndexCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="previousByteBtn" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="previous2nBtn" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="maxByteIndexSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="minByteIndexSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="curs2IndexSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="cursor2" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="selectionCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                      </Group>
+                      <Component id="seperatorLeft" alignment="0" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                          <Group type="102" attributes="0">
+                              <Component id="interpretedLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="saveInterpBtn" alignment="3" min="-2" pref="17" max="-2" attributes="0"/>
+                                  <Component id="listInterpBtn" alignment="3" min="-2" pref="17" max="-2" attributes="0"/>
+                                  <Component id="loadInterpBtn" alignment="3" min="-2" pref="17" max="-2" attributes="0"/>
+                                  <Component id="ponderInterpBtn" alignment="3" min="-2" pref="17" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="noteLabel" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="103" alignment="0" groupAlignment="1" attributes="0">
+                              <Group type="102" attributes="0">
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="nextByteBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="next2nBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="maxUbdexLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="minIndexLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="previousByteBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="previous2nBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="maxByteIndexSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="minByteIndexSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <Component id="seperatorRight" min="-2" pref="80" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -569,7 +570,7 @@
         </Component>
         <Component class="javax.swing.JSpinner" name="curs1IndexSpinner">
         </Component>
-        <Component class="javax.swing.JSeparator" name="jSeparator1">
+        <Component class="javax.swing.JSeparator" name="seperatorLeft">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="0" green="0" red="0" type="rgb"/>
@@ -589,7 +590,7 @@
             <Property name="text" type="java.lang.String" value="jLabel4"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JSeparator" name="jSeparator2">
+        <Component class="javax.swing.JSeparator" name="seperatorRight">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="0" green="0" red="0" type="rgb"/>
@@ -640,7 +641,6 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Segoe UI" size="12" style="3"/>
             </Property>
-            <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="Cursor 1"/>
           </Properties>
           <Events>
@@ -655,6 +655,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection component="cursor1" name="font" type="property"/>
             </Property>
+            <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="Cursor 2"/>
           </Properties>
           <Events>
@@ -701,12 +702,12 @@
         </Component>
         <Component class="javax.swing.JSpinner" name="maxByteIndexSpinner">
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel1">
+        <Component class="javax.swing.JLabel" name="maxUbdexLabel">
           <Properties>
             <Property name="text" type="java.lang.String" value="Max Index"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel2">
+        <Component class="javax.swing.JLabel" name="minIndexLabel">
           <Properties>
             <Property name="text" type="java.lang.String" value="Min Index"/>
           </Properties>
@@ -729,10 +730,10 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jLabel5" max="32767" attributes="0"/>
-                      <Component id="jLabel4" alignment="0" max="32767" attributes="0"/>
-                      <Component id="jTextField1" alignment="0" pref="0" max="32767" attributes="0"/>
-                      <Component id="jScrollPane2" alignment="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="endianessLabel" max="32767" attributes="0"/>
+                      <Component id="interpMethodLabl" alignment="0" max="32767" attributes="0"/>
+                      <Component id="searchBarJTextField" alignment="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="interpMethodScrollPane" alignment="0" pref="0" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="littleEndianRadio" max="32767" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -747,25 +748,25 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jLabel4" min="-2" pref="31" max="-2" attributes="0"/>
+                  <Component id="interpMethodLabl" min="-2" pref="31" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+                  <Component id="endianessLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="littleEndianRadio" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="bigEdianRadio" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jTextField1" min="-2" max="-2" attributes="0"/>
+                  <Component id="searchBarJTextField" min="-2" max="-2" attributes="0"/>
                   <EmptySpace pref="20" max="32767" attributes="0"/>
-                  <Component id="jScrollPane2" min="-2" pref="142" max="-2" attributes="0"/>
+                  <Component id="interpMethodScrollPane" min="-2" pref="142" max="-2" attributes="0"/>
                   <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JLabel" name="jLabel4">
+        <Component class="javax.swing.JLabel" name="interpMethodLabl">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Segoe UI" size="18" style="0"/>
@@ -773,16 +774,16 @@
             <Property name="text" type="java.lang.String" value="Interp Methods"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="jTextField1">
+        <Component class="javax.swing.JTextField" name="searchBarJTextField">
           <Properties>
             <Property name="text" type="java.lang.String" value="(Search for a method)"/>
             <Property name="toolTipText" type="java.lang.String" value="(Search for a method)"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jTextField1ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="searchBarJTextFieldActionPerformed"/>
           </Events>
         </Component>
-        <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+        <Container class="javax.swing.JScrollPane" name="interpMethodScrollPane">
           <Properties>
             <Property name="horizontalScrollBarPolicy" type="int" value="31"/>
           </Properties>
@@ -821,7 +822,7 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bigEdianRadioActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel5">
+        <Component class="javax.swing.JLabel" name="endianessLabel">
           <Properties>
             <Property name="text" type="java.lang.String" value="Endianess:"/>
           </Properties>
@@ -835,7 +836,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Container class="javax.swing.JPanel" name="jPanel3">
+        <Container class="javax.swing.JPanel" name="fileViewPanel">
 
           <Layout>
             <DimensionLayout dim="0">
@@ -843,10 +844,10 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jLabel7" max="32767" attributes="0"/>
-                          <Component id="jScrollPane4" alignment="1" max="32767" attributes="0"/>
-                          <Component id="jScrollPane5" alignment="1" max="32767" attributes="0"/>
-                          <Component id="jLabel8" alignment="0" max="32767" attributes="0"/>
+                          <Component id="fileViewLabel" max="32767" attributes="0"/>
+                          <Component id="innerViewScrollPane" alignment="1" max="32767" attributes="0"/>
+                          <Component id="groupingScrollPane" alignment="1" max="32767" attributes="0"/>
+                          <Component id="characterGroupingLabel" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -856,20 +857,20 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jLabel7" min="-2" pref="24" max="-2" attributes="0"/>
+                      <Component id="fileViewLabel" min="-2" pref="24" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="jScrollPane4" min="-2" pref="122" max="-2" attributes="0"/>
+                      <Component id="innerViewScrollPane" min="-2" pref="122" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
+                      <Component id="characterGroupingLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="jScrollPane5" pref="122" max="32767" attributes="0"/>
+                      <Component id="groupingScrollPane" pref="122" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JLabel" name="jLabel7">
+            <Component class="javax.swing.JLabel" name="fileViewLabel">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Segoe UI" size="18" style="2"/>
@@ -877,14 +878,14 @@
                 <Property name="text" type="java.lang.String" value="File View"/>
               </Properties>
             </Component>
-            <Container class="javax.swing.JScrollPane" name="jScrollPane4">
+            <Container class="javax.swing.JScrollPane" name="innerViewScrollPane">
               <Properties>
                 <Property name="horizontalScrollBarPolicy" type="int" value="31"/>
               </Properties>
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
               <SubComponents>
-                <Container class="javax.swing.JPanel" name="jPanel4">
+                <Container class="javax.swing.JPanel" name="innerViewJPanel">
 
                   <Layout>
                     <DimensionLayout dim="0">
@@ -945,7 +946,7 @@
                 </Container>
               </SubComponents>
             </Container>
-            <Container class="javax.swing.JScrollPane" name="jScrollPane5">
+            <Container class="javax.swing.JScrollPane" name="groupingScrollPane">
               <Properties>
                 <Property name="horizontalScrollBarPolicy" type="int" value="31"/>
                 <Property name="toolTipText" type="java.lang.String" value=""/>
@@ -953,7 +954,7 @@
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
               <SubComponents>
-                <Container class="javax.swing.JPanel" name="jPanel5">
+                <Container class="javax.swing.JPanel" name="groupingJPanel">
 
                   <Layout>
                     <DimensionLayout dim="0">
@@ -1031,7 +1032,7 @@
                 </Container>
               </SubComponents>
             </Container>
-            <Component class="javax.swing.JLabel" name="jLabel8">
+            <Component class="javax.swing.JLabel" name="characterGroupingLabel">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Character Grouping"/>
               </Properties>

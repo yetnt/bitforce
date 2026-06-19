@@ -103,10 +103,7 @@ public class Converter {
                 charLength += 2;
             }
             JLabelRichText inner =
-                    new JLabelRichText(applyGrouping(switch (view) {
-                        case HEX -> String.format("%02X", b).toCharArray();
-                        case BIN -> String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0').toCharArray();
-                    }));
+                    new JLabelRichText(applyGrouping(view.call(b)));
             if (showSelection && byteSelected(bytes, i + minByteIndex, start, end))
                 inner.font(Color.RED, "6", new Color(201, 232, 177)).italic();
             else

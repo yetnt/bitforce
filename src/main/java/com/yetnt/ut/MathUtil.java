@@ -1,4 +1,4 @@
-package com.yetnt;
+package com.yetnt.ut;
 
 public abstract class MathUtil {
     /**

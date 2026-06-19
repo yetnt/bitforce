@@ -1,6 +1,6 @@
 package com.yetnt.api;
 
-import com.yetnt.MathUtil;
+import com.yetnt.ut.MathUtil;
 
 import javax.swing.*;
 
@@ -123,5 +123,9 @@ public class Cursor {
             System.arraycopy(bytes, start.getByteIndex(), subArray, 0, subArray.length);
             return subArray;
         }
+    }
+
+    public void setMaxValue(int maxValue) {
+        this.maxValue = maxValue;
     }
 }

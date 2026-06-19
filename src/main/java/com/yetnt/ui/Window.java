@@ -5,7 +5,8 @@
 package com.yetnt.ui;
 
 import com.yetnt.JLabelRichText;
-import com.yetnt.MathUtil;
+import com.yetnt.ut.FilesUtility;
+import com.yetnt.ut.MathUtil;
 import com.yetnt.api.CharGroups;
 import com.yetnt.api.Cursor;
 import com.yetnt.api.View;
@@ -17,6 +18,9 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 
@@ -44,20 +48,39 @@ public class Window extends javax.swing.JFrame {
         initComponents();
         this.bytes = new byte[0];
         start = new Cursor(0, curs1IndexSpinner);
-        selectedCursor = start;
         end = new Cursor(0, curs2IndexSpinner);
-        spinnerEvents();
+        selectedCursor = end;
+        init2();
         print();
     }
 
-    public Window(byte[] bytes) {
+    public Window(byte[] bytes, String title) {
+        this.setTitle(title);
         initComponents();
         this.bytes = bytes;
         start = new Cursor(bytes.length, curs1IndexSpinner);
-        selectedCursor = start;
         end = new Cursor(bytes.length, curs2IndexSpinner);
-        spinnerEvents();
+        selectedCursor = end;
+        init2();
         print();
+    }
+
+    public void load(File file) {
+        try {
+            this.setTitle(file.getAbsolutePath());
+            start.setByteIndex(0);
+            end.setByteIndex(0);
+            bytes = Files.readAllBytes(file.toPath());
+            start.setMaxValue(bytes.length);
+            end.setMaxValue(bytes.length);
+            print();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Converter getConverter() {
+        return converter;
     }
 
     private void interpMethod() {
@@ -68,74 +91,61 @@ public class Window extends javax.swing.JFrame {
         interpLabelFrame.setString(str);
     }
 
-    private void spinnerEvents() {
-        curs1IndexSpinner.addChangeListener(
-                e -> {
-                    start.setByteIndex((Integer) curs1IndexSpinner.getValue());
-                    print();
-                    interpMethod();
-                }
-        );
-        curs2IndexSpinner.addChangeListener(
-                e -> {
-                    end.setByteIndex((Integer) curs2IndexSpinner.getValue());
-                    print();
-                    interpMethod();
-                }
-        );
-        maxByteIndexSpinner.setModel(
-                new SpinnerNumberModel(
-                        converter.getMaxByteIndex(),
-                        0,
-                        bytes.length,
-                        1
-                )
-        );
-        minByteIndexSpinner.setModel(
-                new SpinnerNumberModel(
-                        converter.getMinByteIndex(),
-                        0,
-                        bytes.length,
-                        1
-                )
-        );
-        maxByteIndexSpinner.addChangeListener(
-                e -> {
-                    converter.setMaxByteIndex((Integer) maxByteIndexSpinner.getValue());
-                    print();
-                }
-        );
-        minByteIndexSpinner.addChangeListener(
-                e -> {
-                    converter.setMinByteIndex((Integer) minByteIndexSpinner.getValue());
-                    print();
-                }
-        );
+    private void init2() {
+        curs1IndexSpinner.addChangeListener(e -> {
+            start.setByteIndex((Integer) curs1IndexSpinner.getValue());
+            print();
+            interpMethod();
+        });
+        curs2IndexSpinner.addChangeListener(e -> {
+            end.setByteIndex((Integer) curs2IndexSpinner.getValue());print();
+            interpMethod();
+        });
+        maxByteIndexSpinner.setModel(new SpinnerNumberModel(
+                converter.getMaxByteIndex(),
+                0,
+                bytes.length,
+                1
+        ));
+        minByteIndexSpinner.setModel(new SpinnerNumberModel(
+                converter.getMinByteIndex(),
+                0,
+                bytes.length,
+                1));
+        maxByteIndexSpinner.addChangeListener(e -> {
+            converter.setMaxByteIndex((Integer) maxByteIndexSpinner.getValue());
+            print();
+        });
+        minByteIndexSpinner.addChangeListener(e -> {
+            converter.setMinByteIndex((Integer) minByteIndexSpinner.getValue());
+            print();
+        });
 
-        interpretedLabel.addMouseListener(
-                new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        interpLabelFrame.setVisible(true);
-                        System.out.println("h");
-                    }
-                }
-        );
+        interpretedLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                interpLabelFrame.setVisible(true);
+            }
+        });
 
         interpMethod = methods.getFirst();
         methods.getFirst().getRadioButton().setSelected(true);
         for (InterpMethod method : methods) {
             interpMethodsRadioPanel.add(method.getRadioButton());
             interpMethodBtnGroup.add(method.getRadioButton());
-            jMenu6.add(method.getMenuItem());
+            methodJMenu.add(method.getMenuItem());
             ActionListener a = e -> {
-                        interpretedLabel.setText(method.interpret(selectedBytes(), endianess));
-                        interpMethod = method;
-                        method.getRadioButton().setSelected(true);
+                String str = method.interpret(selectedBytes(), endianess);
+                interpretedLabel.setText(str);
+                interpLabelFrame.setString(str);
+                interpMethod = method;
+                method.getRadioButton().setSelected(true);
+                iNote();
             };
             method.getRadioButton().addActionListener(a);
             method.getMenuItem().addActionListener(a);
         }
+        first100BytesMenuItemActionPerformed(null);
         interpMethodsRadioPanel.repaint();
         interpMethodsRadioPanel.revalidate();
         repaint();
@@ -163,6 +173,9 @@ public class Window extends javax.swing.JFrame {
 
     private void note(String txt) {
         noteLabel.setText(txt);
+    }
+    private void iNote() {
+        note("Set the interpretation method to " + interpMethod.getName());
     }
 
     private boolean _setMinValue(int min) {
@@ -294,9 +307,9 @@ public class Window extends javax.swing.JFrame {
         mainControlsPanel = new javax.swing.JPanel();
         curs2IndexSpinner = new javax.swing.JSpinner();
         curs1IndexSpinner = new javax.swing.JSpinner();
-        jSeparator1 = new javax.swing.JSeparator();
+        seperatorLeft = new javax.swing.JSeparator();
         interpretedLabel = new javax.swing.JLabel();
-        jSeparator2 = new javax.swing.JSeparator();
+        seperatorRight = new javax.swing.JSeparator();
         nextByteBtn = new javax.swing.JButton();
         previousByteBtn = new javax.swing.JButton();
         next2nBtn = new javax.swing.JButton();
@@ -310,67 +323,67 @@ public class Window extends javax.swing.JFrame {
         loadInterpBtn = new javax.swing.JButton();
         ponderInterpBtn = new javax.swing.JButton();
         maxByteIndexSpinner = new javax.swing.JSpinner();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        maxUbdexLabel = new javax.swing.JLabel();
+        minIndexLabel = new javax.swing.JLabel();
         minByteIndexSpinner = new javax.swing.JSpinner();
         noteLabel = new javax.swing.JLabel();
         methodPanel = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        interpMethodLabl = new javax.swing.JLabel();
+        searchBarJTextField = new javax.swing.JTextField();
+        interpMethodScrollPane = new javax.swing.JScrollPane();
         interpMethodsRadioPanel = new javax.swing.JPanel();
         littleEndianRadio = new javax.swing.JRadioButton();
         bigEdianRadio = new javax.swing.JRadioButton();
-        jLabel5 = new javax.swing.JLabel();
+        endianessLabel = new javax.swing.JLabel();
         fileViewScrollPane = new javax.swing.JScrollPane();
-        jPanel3 = new javax.swing.JPanel();
-        jLabel7 = new javax.swing.JLabel();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        jPanel4 = new javax.swing.JPanel();
+        fileViewPanel = new javax.swing.JPanel();
+        fileViewLabel = new javax.swing.JLabel();
+        innerViewScrollPane = new javax.swing.JScrollPane();
+        innerViewJPanel = new javax.swing.JPanel();
         bitViewRadio = new javax.swing.JRadioButton();
         byteViewRadio1 = new javax.swing.JRadioButton();
-        jScrollPane5 = new javax.swing.JScrollPane();
-        jPanel5 = new javax.swing.JPanel();
+        groupingScrollPane = new javax.swing.JScrollPane();
+        groupingJPanel = new javax.swing.JPanel();
         singularRadio = new javax.swing.JRadioButton();
         group2Radio = new javax.swing.JRadioButton();
         group4Radio = new javax.swing.JRadioButton();
-        jLabel8 = new javax.swing.JLabel();
+        characterGroupingLabel = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        fileJMenu = new javax.swing.JMenu();
         loadFileMenuItem = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
-        jMenu3 = new javax.swing.JMenu();
+        editJMenu = new javax.swing.JMenu();
+        curorJMenu = new javax.swing.JMenu();
         selectCursor1MenuItem = new javax.swing.JMenuItem();
         selectCursor2MenuItem = new javax.swing.JMenuItem();
         nextByteMenuItem = new javax.swing.JMenuItem();
         previousByteMenuItem = new javax.swing.JMenuItem();
-        jMenu11 = new javax.swing.JMenu();
+        snap2nByteJMenu = new javax.swing.JMenu();
         set2nValueMenuItem = new javax.swing.JMenuItem();
         nextBytesMenuItem = new javax.swing.JMenuItem();
         previousBytesMenuItem = new javax.swing.JMenuItem();
         teleportMenuItem = new javax.swing.JMenuItem();
-        jMenu4 = new javax.swing.JMenu();
+        viewJMenu = new javax.swing.JMenu();
         binaryViewMenuItem = new javax.swing.JMenuItem();
         hexViewMenuItem = new javax.swing.JMenuItem();
-        jMenu7 = new javax.swing.JMenu();
+        charGroupingJMenu = new javax.swing.JMenu();
         singularMenuItem = new javax.swing.JMenuItem();
         grouped2menuItem = new javax.swing.JMenuItem();
         grouped4menuitem = new javax.swing.JMenuItem();
-        jMenu8 = new javax.swing.JMenu();
+        viewByteJMenu = new javax.swing.JMenu();
         setViewAroundCursorMenuItem = new javax.swing.JMenuItem();
         showAllBytesMenuItem = new javax.swing.JMenuItem();
         first100BytesMenuItem = new javax.swing.JMenuItem();
         last100BytesMenuItem = new javax.swing.JMenuItem();
         plus100BytesMenuItem = new javax.swing.JMenuItem();
         minus100BytesMenuItem = new javax.swing.JMenuItem();
-        jMenu9 = new javax.swing.JMenu();
+        minIndexJMenu = new javax.swing.JMenu();
         plusMinMenuItem = new javax.swing.JMenuItem();
         minusMinMenuItem = new javax.swing.JMenuItem();
-        jMenu10 = new javax.swing.JMenu();
+        maxIndexJMenu = new javax.swing.JMenu();
         plusMaxMenuItem = new javax.swing.JMenuItem();
         minusMaxMenuItem = new javax.swing.JMenuItem();
-        jMenu5 = new javax.swing.JMenu();
-        jMenu6 = new javax.swing.JMenu();
+        interpJMenu = new javax.swing.JMenu();
+        methodJMenu = new javax.swing.JMenu();
         openInterpWindowMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -379,17 +392,17 @@ public class Window extends javax.swing.JFrame {
         viewerLabel.setText("Our very funny colour coded via cursor and byte seperated input will go into here.");
         viewerScrollpane.setViewportView(viewerLabel);
 
-        jSeparator1.setBackground(new java.awt.Color(0, 0, 0));
-        jSeparator1.setForeground(new java.awt.Color(0, 0, 0));
-        jSeparator1.setOpaque(true);
+        seperatorLeft.setBackground(new java.awt.Color(0, 0, 0));
+        seperatorLeft.setForeground(new java.awt.Color(0, 0, 0));
+        seperatorLeft.setOpaque(true);
 
         interpretedLabel.setFont(new java.awt.Font("Segoe UI", 3, 24)); // NOI18N
         interpretedLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         interpretedLabel.setText("jLabel4");
 
-        jSeparator2.setBackground(new java.awt.Color(0, 0, 0));
-        jSeparator2.setForeground(new java.awt.Color(0, 0, 0));
-        jSeparator2.setOpaque(true);
+        seperatorRight.setBackground(new java.awt.Color(0, 0, 0));
+        seperatorRight.setForeground(new java.awt.Color(0, 0, 0));
+        seperatorRight.setOpaque(true);
 
         nextByteBtn.setText("next byte");
         nextByteBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -421,7 +434,6 @@ public class Window extends javax.swing.JFrame {
 
         cursorBtnGroup.add(cursor1);
         cursor1.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
-        cursor1.setSelected(true);
         cursor1.setText("Cursor 1");
         cursor1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -431,6 +443,7 @@ public class Window extends javax.swing.JFrame {
 
         cursorBtnGroup.add(cursor2);
         cursor2.setFont(cursor1.getFont());
+        cursor2.setSelected(true);
         cursor2.setText("Cursor 2");
         cursor2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -462,9 +475,9 @@ public class Window extends javax.swing.JFrame {
 
         ponderInterpBtn.setText("ponder");
 
-        jLabel1.setText("Max Index");
+        maxUbdexLabel.setText("Max Index");
 
-        jLabel2.setText("Min Index");
+        minIndexLabel.setText("Min Index");
 
         noteLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         noteLabel.setText("hallo im a note :)");
@@ -487,7 +500,7 @@ public class Window extends javax.swing.JFrame {
                     .addComponent(byteIndexCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(selectionCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(seperatorLeft, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -505,8 +518,8 @@ public class Window extends javax.swing.JFrame {
                         .addGap(6, 6, 6)
                         .addComponent(noteLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 355, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(seperatorRight, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(nextByteBtn)
                     .addComponent(previousByteBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -521,11 +534,11 @@ public class Window extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(minByteIndexSpinner))
                     .addGroup(mainControlsPanelLayout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(maxUbdexLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2)
+                        .addComponent(minIndexLabel)
                         .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                .addGap(12, 12, 12))
         );
         mainControlsPanelLayout.setVerticalGroup(
             mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -533,62 +546,60 @@ public class Window extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainControlsPanelLayout.createSequentialGroup()
-                        .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(mainControlsPanelLayout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(curs1IndexSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(cursor1)
-                                    .addComponent(byteIndexCheckBox))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(curs2IndexSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(cursor2)
-                                    .addComponent(selectionCheckBox)))
-                            .addGroup(mainControlsPanelLayout.createSequentialGroup()
-                                .addComponent(interpretedLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(saveInterpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(listInterpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(loadInterpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(ponderInterpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(noteLabel))
-                    .addComponent(jSeparator1)
-                    .addComponent(jSeparator2)
-                    .addGroup(mainControlsPanelLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(6, 6, 6)
                         .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(nextByteBtn)
-                            .addComponent(next2nBtn)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2))
+                            .addComponent(curs1IndexSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cursor1)
+                            .addComponent(byteIndexCheckBox))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(previousByteBtn)
-                            .addComponent(previous2nBtn)
-                            .addComponent(maxByteIndexSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(minByteIndexSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(15, 15, 15)))
-                .addContainerGap())
+                            .addComponent(curs2IndexSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cursor2)
+                            .addComponent(selectionCheckBox)))
+                    .addComponent(seperatorLeft, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(mainControlsPanelLayout.createSequentialGroup()
+                            .addComponent(interpretedLabel)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(saveInterpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(listInterpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(loadInterpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(ponderInterpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(noteLabel))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(mainControlsPanelLayout.createSequentialGroup()
+                                .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(nextByteBtn)
+                                    .addComponent(next2nBtn)
+                                    .addComponent(maxUbdexLabel)
+                                    .addComponent(minIndexLabel))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(mainControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(previousByteBtn)
+                                    .addComponent(previous2nBtn)
+                                    .addComponent(maxByteIndexSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(minByteIndexSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(seperatorRight, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel4.setText("Interp Methods");
+        interpMethodLabl.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        interpMethodLabl.setText("Interp Methods");
 
-        jTextField1.setText("(Search for a method)");
-        jTextField1.setToolTipText("(Search for a method)");
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        searchBarJTextField.setText("(Search for a method)");
+        searchBarJTextField.setToolTipText("(Search for a method)");
+        searchBarJTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                searchBarJTextFieldActionPerformed(evt);
             }
         });
 
-        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        interpMethodScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         interpMethodsRadioPanel.setLayout(new java.awt.GridLayout(0, 1));
-        jScrollPane2.setViewportView(interpMethodsRadioPanel);
+        interpMethodScrollPane.setViewportView(interpMethodsRadioPanel);
 
         endianessBtnGroup.add(littleEndianRadio);
         littleEndianRadio.setText("little");
@@ -607,7 +618,7 @@ public class Window extends javax.swing.JFrame {
             }
         });
 
-        jLabel5.setText("Endianess:");
+        endianessLabel.setText("Endianess:");
 
         javax.swing.GroupLayout methodPanelLayout = new javax.swing.GroupLayout(methodPanel);
         methodPanel.setLayout(methodPanelLayout);
@@ -616,10 +627,10 @@ public class Window extends javax.swing.JFrame {
             .addGroup(methodPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(methodPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(endianessLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(interpMethodLabl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(searchBarJTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(interpMethodScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(methodPanelLayout.createSequentialGroup()
                         .addComponent(littleEndianRadio, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
@@ -630,26 +641,26 @@ public class Window extends javax.swing.JFrame {
             methodPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(methodPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(interpMethodLabl, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel5)
+                .addComponent(endianessLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(methodPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(littleEndianRadio)
                     .addComponent(bigEdianRadio))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(searchBarJTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(interpMethodScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0))
         );
 
         fileViewScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        jLabel7.setFont(new java.awt.Font("Segoe UI", 2, 18)); // NOI18N
-        jLabel7.setText("File View");
+        fileViewLabel.setFont(new java.awt.Font("Segoe UI", 2, 18)); // NOI18N
+        fileViewLabel.setText("File View");
 
-        jScrollPane4.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        innerViewScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         fileViewBtnGrp.add(bitViewRadio);
         bitViewRadio.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -670,20 +681,20 @@ public class Window extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
+        javax.swing.GroupLayout innerViewJPanelLayout = new javax.swing.GroupLayout(innerViewJPanel);
+        innerViewJPanel.setLayout(innerViewJPanelLayout);
+        innerViewJPanelLayout.setHorizontalGroup(
+            innerViewJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(innerViewJPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(innerViewJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(bitViewRadio, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(byteViewRadio1, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
+        innerViewJPanelLayout.setVerticalGroup(
+            innerViewJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(innerViewJPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(bitViewRadio)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -691,10 +702,10 @@ public class Window extends javax.swing.JFrame {
                 .addContainerGap(413, Short.MAX_VALUE))
         );
 
-        jScrollPane4.setViewportView(jPanel4);
+        innerViewScrollPane.setViewportView(innerViewJPanel);
 
-        jScrollPane5.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        jScrollPane5.setToolTipText("");
+        groupingScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        groupingScrollPane.setToolTipText("");
 
         groupingBtnGrp.add(singularRadio);
         singularRadio.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -724,21 +735,21 @@ public class Window extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
+        javax.swing.GroupLayout groupingJPanelLayout = new javax.swing.GroupLayout(groupingJPanel);
+        groupingJPanel.setLayout(groupingJPanelLayout);
+        groupingJPanelLayout.setHorizontalGroup(
+            groupingJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(groupingJPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(groupingJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(singularRadio, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(group2Radio, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                     .addComponent(group4Radio, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
+        groupingJPanelLayout.setVerticalGroup(
+            groupingJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(groupingJPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(singularRadio)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -748,51 +759,56 @@ public class Window extends javax.swing.JFrame {
                 .addContainerGap(386, Short.MAX_VALUE))
         );
 
-        jScrollPane5.setViewportView(jPanel5);
+        groupingScrollPane.setViewportView(groupingJPanel);
 
-        jLabel8.setText("Character Grouping");
+        characterGroupingLabel.setText("Character Grouping");
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+        javax.swing.GroupLayout fileViewPanelLayout = new javax.swing.GroupLayout(fileViewPanel);
+        fileViewPanel.setLayout(fileViewPanelLayout);
+        fileViewPanelLayout.setHorizontalGroup(
+            fileViewPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(fileViewPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(fileViewPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(fileViewLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(innerViewScrollPane, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(groupingScrollPane, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(characterGroupingLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+        fileViewPanelLayout.setVerticalGroup(
+            fileViewPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(fileViewPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(fileViewLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(innerViewScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
+                .addComponent(characterGroupingLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
+                .addComponent(groupingScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        fileViewScrollPane.setViewportView(jPanel3);
+        fileViewScrollPane.setViewportView(fileViewPanel);
 
-        jMenu1.setText("File");
+        fileJMenu.setText("File");
 
         loadFileMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         loadFileMenuItem.setText("Load FIel");
-        jMenu1.add(loadFileMenuItem);
+        loadFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadFileMenuItemActionPerformed(evt);
+            }
+        });
+        fileJMenu.add(loadFileMenuItem);
 
-        jMenuBar1.add(jMenu1);
+        jMenuBar1.add(fileJMenu);
 
-        jMenu2.setText("Edit");
-        jMenuBar1.add(jMenu2);
+        editJMenu.setText("Edit");
+        jMenuBar1.add(editJMenu);
 
-        jMenu3.setText("Cursors");
+        curorJMenu.setText("Cursors");
 
         selectCursor1MenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, 0));
         selectCursor1MenuItem.setText("Select Cursor 1");
@@ -801,7 +817,7 @@ public class Window extends javax.swing.JFrame {
                 selectCursor1MenuItemActionPerformed(evt);
             }
         });
-        jMenu3.add(selectCursor1MenuItem);
+        curorJMenu.add(selectCursor1MenuItem);
 
         selectCursor2MenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_2, 0));
         selectCursor2MenuItem.setText("Select Cursor 2");
@@ -810,7 +826,7 @@ public class Window extends javax.swing.JFrame {
                 selectCursor2MenuItemActionPerformed(evt);
             }
         });
-        jMenu3.add(selectCursor2MenuItem);
+        curorJMenu.add(selectCursor2MenuItem);
 
         nextByteMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_PERIOD, 0));
         nextByteMenuItem.setText("Next Byte");
@@ -819,7 +835,7 @@ public class Window extends javax.swing.JFrame {
                 nextByteMenuItemActionPerformed(evt);
             }
         });
-        jMenu3.add(nextByteMenuItem);
+        curorJMenu.add(nextByteMenuItem);
 
         previousByteMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_COMMA, 0));
         previousByteMenuItem.setText("Previous Byte");
@@ -828,9 +844,9 @@ public class Window extends javax.swing.JFrame {
                 previousByteMenuItemActionPerformed(evt);
             }
         });
-        jMenu3.add(previousByteMenuItem);
+        curorJMenu.add(previousByteMenuItem);
 
-        jMenu11.setText("2^nth Byte Snapping");
+        snap2nByteJMenu.setText("2^nth Byte Snapping");
 
         set2nValueMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_BACK_SLASH, 0));
         set2nValueMenuItem.setText("Set 2^n Value");
@@ -839,7 +855,7 @@ public class Window extends javax.swing.JFrame {
                 set2nValueMenuItemActionPerformed(evt);
             }
         });
-        jMenu11.add(set2nValueMenuItem);
+        snap2nByteJMenu.add(set2nValueMenuItem);
 
         nextBytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_CLOSE_BRACKET, 0));
         nextBytesMenuItem.setText("Next Bytes");
@@ -848,7 +864,7 @@ public class Window extends javax.swing.JFrame {
                 nextBytesMenuItemActionPerformed(evt);
             }
         });
-        jMenu11.add(nextBytesMenuItem);
+        snap2nByteJMenu.add(nextBytesMenuItem);
 
         previousBytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_OPEN_BRACKET, 0));
         previousBytesMenuItem.setText("Previous Bytes");
@@ -857,9 +873,9 @@ public class Window extends javax.swing.JFrame {
                 previousBytesMenuItemActionPerformed(evt);
             }
         });
-        jMenu11.add(previousBytesMenuItem);
+        snap2nByteJMenu.add(previousBytesMenuItem);
 
-        jMenu3.add(jMenu11);
+        curorJMenu.add(snap2nByteJMenu);
 
         teleportMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_SLASH, 0));
         teleportMenuItem.setText("Teleport Cursor To Byte");
@@ -868,11 +884,11 @@ public class Window extends javax.swing.JFrame {
                 teleportMenuItemActionPerformed(evt);
             }
         });
-        jMenu3.add(teleportMenuItem);
+        curorJMenu.add(teleportMenuItem);
 
-        jMenuBar1.add(jMenu3);
+        jMenuBar1.add(curorJMenu);
 
-        jMenu4.setText("View");
+        viewJMenu.setText("View");
 
         binaryViewMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         binaryViewMenuItem.setText("Binary");
@@ -881,7 +897,7 @@ public class Window extends javax.swing.JFrame {
                 binaryViewMenuItemActionPerformed(evt);
             }
         });
-        jMenu4.add(binaryViewMenuItem);
+        viewJMenu.add(binaryViewMenuItem);
 
         hexViewMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         hexViewMenuItem.setText("Hex");
@@ -890,9 +906,9 @@ public class Window extends javax.swing.JFrame {
                 hexViewMenuItemActionPerformed(evt);
             }
         });
-        jMenu4.add(hexViewMenuItem);
+        viewJMenu.add(hexViewMenuItem);
 
-        jMenu7.setText("Character Grouping");
+        charGroupingJMenu.setText("Character Grouping");
 
         singularMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         singularMenuItem.setText("Singular");
@@ -901,7 +917,7 @@ public class Window extends javax.swing.JFrame {
                 singularMenuItemActionPerformed(evt);
             }
         });
-        jMenu7.add(singularMenuItem);
+        charGroupingJMenu.add(singularMenuItem);
 
         grouped2menuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_2, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         grouped2menuItem.setText("Grouped 2");
@@ -910,7 +926,7 @@ public class Window extends javax.swing.JFrame {
                 grouped2menuItemActionPerformed(evt);
             }
         });
-        jMenu7.add(grouped2menuItem);
+        charGroupingJMenu.add(grouped2menuItem);
 
         grouped4menuitem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_4, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         grouped4menuitem.setText("Grouped 4");
@@ -919,11 +935,11 @@ public class Window extends javax.swing.JFrame {
                 grouped4menuitemActionPerformed(evt);
             }
         });
-        jMenu7.add(grouped4menuitem);
+        charGroupingJMenu.add(grouped4menuitem);
 
-        jMenu4.add(jMenu7);
+        viewJMenu.add(charGroupingJMenu);
 
-        jMenu8.setText("Viewable Bytes");
+        viewByteJMenu.setText("Viewable Bytes");
 
         setViewAroundCursorMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_SLASH, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         setViewAroundCursorMenuItem.setText("Set View Around Cursor");
@@ -932,7 +948,7 @@ public class Window extends javax.swing.JFrame {
                 setViewAroundCursorMenuItemActionPerformed(evt);
             }
         });
-        jMenu8.add(setViewAroundCursorMenuItem);
+        viewByteJMenu.add(setViewAroundCursorMenuItem);
 
         showAllBytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         showAllBytesMenuItem.setText("Show All Bytes");
@@ -941,7 +957,7 @@ public class Window extends javax.swing.JFrame {
                 showAllBytesMenuItemActionPerformed(evt);
             }
         });
-        jMenu8.add(showAllBytesMenuItem);
+        viewByteJMenu.add(showAllBytesMenuItem);
 
         first100BytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_HOME, 0));
         first100BytesMenuItem.setText("First 100 bytes");
@@ -950,7 +966,7 @@ public class Window extends javax.swing.JFrame {
                 first100BytesMenuItemActionPerformed(evt);
             }
         });
-        jMenu8.add(first100BytesMenuItem);
+        viewByteJMenu.add(first100BytesMenuItem);
 
         last100BytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_END, 0));
         last100BytesMenuItem.setText("Last 100 Bytes");
@@ -959,7 +975,7 @@ public class Window extends javax.swing.JFrame {
                 last100BytesMenuItemActionPerformed(evt);
             }
         });
-        jMenu8.add(last100BytesMenuItem);
+        viewByteJMenu.add(last100BytesMenuItem);
 
         plus100BytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_PAGE_DOWN, 0));
         plus100BytesMenuItem.setText("+100 Bytes");
@@ -968,7 +984,7 @@ public class Window extends javax.swing.JFrame {
                 plus100BytesMenuItemActionPerformed(evt);
             }
         });
-        jMenu8.add(plus100BytesMenuItem);
+        viewByteJMenu.add(plus100BytesMenuItem);
 
         minus100BytesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_PAGE_UP, 0));
         minus100BytesMenuItem.setText("-100 Bytes");
@@ -977,9 +993,9 @@ public class Window extends javax.swing.JFrame {
                 minus100BytesMenuItemActionPerformed(evt);
             }
         });
-        jMenu8.add(minus100BytesMenuItem);
+        viewByteJMenu.add(minus100BytesMenuItem);
 
-        jMenu9.setText("Min Index");
+        minIndexJMenu.setText("Min Index");
 
         plusMinMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ADD, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         plusMinMenuItem.setText("Increment Min Index");
@@ -988,7 +1004,7 @@ public class Window extends javax.swing.JFrame {
                 plusMinMenuItemActionPerformed(evt);
             }
         });
-        jMenu9.add(plusMinMenuItem);
+        minIndexJMenu.add(plusMinMenuItem);
 
         minusMinMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_SUBTRACT, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         minusMinMenuItem.setText("Decrement Min Index");
@@ -997,11 +1013,11 @@ public class Window extends javax.swing.JFrame {
                 minusMinMenuItemActionPerformed(evt);
             }
         });
-        jMenu9.add(minusMinMenuItem);
+        minIndexJMenu.add(minusMinMenuItem);
 
-        jMenu8.add(jMenu9);
+        viewByteJMenu.add(minIndexJMenu);
 
-        jMenu10.setText("Max Index");
+        maxIndexJMenu.setText("Max Index");
 
         plusMaxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ADD, 0));
         plusMaxMenuItem.setText("Increment Max Index");
@@ -1010,7 +1026,7 @@ public class Window extends javax.swing.JFrame {
                 plusMaxMenuItemActionPerformed(evt);
             }
         });
-        jMenu10.add(plusMaxMenuItem);
+        maxIndexJMenu.add(plusMaxMenuItem);
 
         minusMaxMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_SUBTRACT, 0));
         minusMaxMenuItem.setText("Decrement Max Index");
@@ -1019,18 +1035,18 @@ public class Window extends javax.swing.JFrame {
                 minusMaxMenuItemActionPerformed(evt);
             }
         });
-        jMenu10.add(minusMaxMenuItem);
+        maxIndexJMenu.add(minusMaxMenuItem);
 
-        jMenu8.add(jMenu10);
+        viewByteJMenu.add(maxIndexJMenu);
 
-        jMenu4.add(jMenu8);
+        viewJMenu.add(viewByteJMenu);
 
-        jMenuBar1.add(jMenu4);
+        jMenuBar1.add(viewJMenu);
 
-        jMenu5.setText("Interpretation");
+        interpJMenu.setText("Interpretation");
 
-        jMenu6.setText("Methods");
-        jMenu5.add(jMenu6);
+        methodJMenu.setText("Methods");
+        interpJMenu.add(methodJMenu);
 
         openInterpWindowMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         openInterpWindowMenuItem.setText("Open Window");
@@ -1039,9 +1055,9 @@ public class Window extends javax.swing.JFrame {
                 openInterpWindowMenuItemActionPerformed(evt);
             }
         });
-        jMenu5.add(openInterpWindowMenuItem);
+        interpJMenu.add(openInterpWindowMenuItem);
 
-        jMenuBar1.add(jMenu5);
+        jMenuBar1.add(interpJMenu);
 
         setJMenuBar(jMenuBar1);
 
@@ -1050,9 +1066,9 @@ public class Window extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(mainControlsPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(viewerScrollpane, javax.swing.GroupLayout.Alignment.LEADING))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(mainControlsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(viewerScrollpane))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(methodPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1063,8 +1079,8 @@ public class Window extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(mainControlsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(viewerScrollpane, javax.swing.GroupLayout.PREFERRED_SIZE, 504, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(viewerScrollpane, javax.swing.GroupLayout.PREFERRED_SIZE, 512, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(fileViewScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -1086,9 +1102,9 @@ public class Window extends javax.swing.JFrame {
         interpMethod();
     }//GEN-LAST:event_littleEndianRadioActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void searchBarJTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBarJTextFieldActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_searchBarJTextFieldActionPerformed
 
     private void bitViewRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bitViewRadioActionPerformed
         _changeview(View.BIN);
@@ -1309,6 +1325,23 @@ public class Window extends javax.swing.JFrame {
         byteRangeNote();
     }//GEN-LAST:event_setViewAroundCursorMenuItemActionPerformed
 
+    private void loadFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadFileMenuItemActionPerformed
+        File file = FilesUtility.genericFileChooser(this);
+        if (file.isDirectory()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ight so like is a folder a file? don't think so.",
+                    "Err",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        note("Loading file MIGHT take time");
+        load(file);
+        note(file.getName() + " was loaded twin");
+    }//GEN-LAST:event_loadFileMenuItemActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1350,13 +1383,21 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JRadioButton bitViewRadio;
     private javax.swing.JCheckBox byteIndexCheckBox;
     private javax.swing.JRadioButton byteViewRadio1;
+    private javax.swing.JMenu charGroupingJMenu;
+    private javax.swing.JLabel characterGroupingLabel;
+    private javax.swing.JMenu curorJMenu;
     private javax.swing.JSpinner curs1IndexSpinner;
     private javax.swing.JSpinner curs2IndexSpinner;
     private javax.swing.JRadioButton cursor1;
     private javax.swing.JRadioButton cursor2;
     private javax.swing.ButtonGroup cursorBtnGroup;
+    private javax.swing.JMenu editJMenu;
     private javax.swing.ButtonGroup endianessBtnGroup;
+    private javax.swing.JLabel endianessLabel;
+    private javax.swing.JMenu fileJMenu;
     private javax.swing.ButtonGroup fileViewBtnGrp;
+    private javax.swing.JLabel fileViewLabel;
+    private javax.swing.JPanel fileViewPanel;
     private javax.swing.JScrollPane fileViewScrollPane;
     private javax.swing.JMenuItem first100BytesMenuItem;
     private javax.swing.JRadioButton group2Radio;
@@ -1364,37 +1405,18 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JMenuItem grouped2menuItem;
     private javax.swing.JMenuItem grouped4menuitem;
     private javax.swing.ButtonGroup groupingBtnGrp;
+    private javax.swing.JPanel groupingJPanel;
+    private javax.swing.JScrollPane groupingScrollPane;
     private javax.swing.JMenuItem hexViewMenuItem;
+    private javax.swing.JPanel innerViewJPanel;
+    private javax.swing.JScrollPane innerViewScrollPane;
+    private javax.swing.JMenu interpJMenu;
     private javax.swing.ButtonGroup interpMethodBtnGroup;
+    private javax.swing.JLabel interpMethodLabl;
+    private javax.swing.JScrollPane interpMethodScrollPane;
     private javax.swing.JPanel interpMethodsRadioPanel;
     private javax.swing.JLabel interpretedLabel;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu10;
-    private javax.swing.JMenu jMenu11;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenu jMenu4;
-    private javax.swing.JMenu jMenu5;
-    private javax.swing.JMenu jMenu6;
-    private javax.swing.JMenu jMenu7;
-    private javax.swing.JMenu jMenu8;
-    private javax.swing.JMenu jMenu9;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JScrollPane jScrollPane5;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JMenuItem last100BytesMenuItem;
     private javax.swing.JButton listInterpBtn;
     private javax.swing.JRadioButton littleEndianRadio;
@@ -1402,8 +1424,13 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JButton loadInterpBtn;
     private javax.swing.JPanel mainControlsPanel;
     private javax.swing.JSpinner maxByteIndexSpinner;
+    private javax.swing.JMenu maxIndexJMenu;
+    private javax.swing.JLabel maxUbdexLabel;
+    private javax.swing.JMenu methodJMenu;
     private javax.swing.JPanel methodPanel;
     private javax.swing.JSpinner minByteIndexSpinner;
+    private javax.swing.JMenu minIndexJMenu;
+    private javax.swing.JLabel minIndexLabel;
     private javax.swing.JMenuItem minus100BytesMenuItem;
     private javax.swing.JMenuItem minusMaxMenuItem;
     private javax.swing.JMenuItem minusMinMenuItem;
@@ -1422,15 +1449,21 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JMenuItem previousByteMenuItem;
     private javax.swing.JMenuItem previousBytesMenuItem;
     private javax.swing.JButton saveInterpBtn;
+    private javax.swing.JTextField searchBarJTextField;
     private javax.swing.JMenuItem selectCursor1MenuItem;
     private javax.swing.JMenuItem selectCursor2MenuItem;
     private javax.swing.JCheckBox selectionCheckBox;
+    private javax.swing.JSeparator seperatorLeft;
+    private javax.swing.JSeparator seperatorRight;
     private javax.swing.JMenuItem set2nValueMenuItem;
     private javax.swing.JMenuItem setViewAroundCursorMenuItem;
     private javax.swing.JMenuItem showAllBytesMenuItem;
     private javax.swing.JMenuItem singularMenuItem;
     private javax.swing.JRadioButton singularRadio;
+    private javax.swing.JMenu snap2nByteJMenu;
     private javax.swing.JMenuItem teleportMenuItem;
+    private javax.swing.JMenu viewByteJMenu;
+    private javax.swing.JMenu viewJMenu;
     private javax.swing.JLabel viewerLabel;
     private javax.swing.JScrollPane viewerScrollpane;
     // End of variables declaration//GEN-END:variables

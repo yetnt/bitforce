@@ -1,5 +1,7 @@
 package com.yetnt.methods;
 
+import com.yetnt.Main;
+
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
@@ -57,6 +59,8 @@ public class InterpMethod {
 
     public static ArrayList<InterpMethod> getMethods() {
         ArrayList<InterpMethod> methods = new ArrayList<>();
+        // SHIFT + V for view as is, for copy pasting
+        methods.add(new asview(KeyEvent.VK_V, 0));
         // SHIFT + U for UTF-8
         methods.add(new utf8(KeyEvent.VK_U, 0));
         // SHIFT + I for int16
@@ -70,36 +74,63 @@ public class InterpMethod {
         return methods;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public static class asview extends InterpMethod {
+
+        public asview(int keycode, int mod) {
+            super("view", keycode, mod);
+
+            this.setInterpreter((stuff, endianess) -> {
+                StringBuilder sb = new StringBuilder();
+                for (byte b : stuff) {
+                    sb.append(
+                            Main.window.getConverter().applyGrouping(
+                                    Main.window.getConverter().view.call(
+                                            b
+                                    )
+                            )
+                    );
+                    sb.append(" ");
+                }
+
+                return sb.toString().trim();
+            });
+        }
+    }
+
     public static class int16 extends InterpMethod {
 
-            public int16(int keycode, int mod) {
-                super("int16", keycode, mod);
+        public int16(int keycode, int mod) {
+            super("int16", keycode, mod);
 
-                this.setInterpreter((stuff, endianess) -> {
-                    StringBuilder sb = new StringBuilder();
+            this.setInterpreter((stuff, endianess) -> {
+                StringBuilder sb = new StringBuilder();
 
-                    for (int i = 0; i < stuff.length; i += 2) {
+                for (int i = 0; i < stuff.length; i += 2) {
 
-                        if (i + 1 >= stuff.length) {
-                            sb.append("? ");
-                            break;
-                        }
-
-                        int b1 = stuff[i] & 0xFF;
-                        int b2 = stuff[i + 1] & 0xFF;
-
-                        int value = switch (endianess) {
-                            case BIG -> (b1 << 8) | b2;
-                            case LITTLE -> (b2 << 8) | b1;
-                        };
-
-                        sb.append((short) value).append(" ");
+                    if (i + 1 >= stuff.length) {
+                        sb.append("? ");
+                        break;
                     }
 
-                    return sb.toString().trim();
-                });
-            }
+                    int b1 = stuff[i] & 0xFF;
+                    int b2 = stuff[i + 1] & 0xFF;
+
+                    int value = switch (endianess) {
+                        case BIG -> (b1 << 8) | b2;
+                        case LITTLE -> (b2 << 8) | b1;
+                    };
+
+                    sb.append((short) value).append(" ");
+                }
+
+                return sb.toString().trim();
+            });
         }
+    }
 
     public static class uint16 extends InterpMethod {
 

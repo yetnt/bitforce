@@ -17,6 +17,7 @@ public class Main {
      * My code, my rules.
      */
     public static String HARD_CODED_PATH_TO_MY_TEST_FILE = "C:\\Users\\ACER\\Documents\\code\\bitforce\\src\\main\\resources\\gq33.wav";
+    public static Window window;
 
     public static void main(String[] args) {
         Path filePath;
@@ -33,7 +34,8 @@ public class Main {
                     break;
                 }
             }
-            new Window(Files.readAllBytes(filePath)).setVisible(true);
+            window = new Window(Files.readAllBytes(filePath), filePath.toAbsolutePath().toString());
+            window.setVisible(true);
         } catch (IOException | IllegalAccessException e) {
             e.printStackTrace();
         } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException e) {
