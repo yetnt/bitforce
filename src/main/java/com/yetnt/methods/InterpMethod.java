@@ -67,6 +67,8 @@ public class InterpMethod {
         methods.add(new int16(KeyEvent.VK_I, 0));
         // SHIFT + CTRL + I for uint16
         methods.add(new uint16(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
+        // SHIFT + N for uint32
+        methods.add(new uint32(KeyEvent.VK_N, 0));
         // SHIFT + F for float32
         methods.add(new float32(KeyEvent.VK_F, 0));
         // SHIFT + CTRL + F for float64
@@ -76,6 +78,14 @@ public class InterpMethod {
 
     public String getName() {
         return name;
+    }
+
+    public JMenuItem cloneMenuItem() {
+        JMenuItem m = new JMenuItem(name);
+        m.addActionListener(menuItem.getActionListeners()[0]);
+        m.setAccelerator(menuItem.getAccelerator());
+        m.setMnemonic(menuItem.getMnemonic());
+        return m;
     }
 
     public static class asview extends InterpMethod {
@@ -164,6 +174,42 @@ public class InterpMethod {
         }
     }
 
+    public static class uint32 extends InterpMethod {
+        public uint32(int keycode, int mod) {
+            super("uint32", keycode, mod);
+            this.setInterpreter(
+                    (stuff, endianess) -> {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < stuff.length; i += 4) {
+                            if (i + 3 >= stuff.length) {
+                                sb.append("? ");
+                                break;
+                            }
+                            int intValue = getBits(stuff, endianess, i);
+                            sb.append(intValue).append(" ");
+                        }
+                        return sb.toString().trim();
+                    }
+            );
+        }
+
+        public static int getBits(byte[] stuff, Endianess endianess, int i) {
+            int intBits;
+            if (endianess == Endianess.BIG) {
+                intBits = ((stuff[i] & 0xFF) << 24) |
+                        ((stuff[i + 1] & 0xFF) << 16) |
+                        ((stuff[i + 2] & 0xFF) << 8) |
+                        (stuff[i + 3] & 0xFF);
+            } else { // LITTLE
+                intBits = ((stuff[i + 3] & 0xFF) << 24) |
+                        ((stuff[i + 2] & 0xFF) << 16) |
+                        ((stuff[i + 1] & 0xFF) << 8) |
+                        (stuff[i] & 0xFF);
+            }
+            return intBits;
+        }
+    }
+
     public static class utf8 extends InterpMethod {
         public utf8(int keycode, int mod) {
             super("UTF-8", keycode, mod);
@@ -189,28 +235,12 @@ public class InterpMethod {
                                 sb.append("? ");
                                 break;
                             }
-                            int intValue = getBits(stuff, endianess, i);
-                            sb.append(intValue).append(" ");
+                            int intValue = uint32.getBits(stuff, endianess, i);
+                            sb.append(Float.intBitsToFloat(intValue)).append(" ");
                         }
                         return sb.toString().trim();
                     }
             );
-        }
-
-        private static int getBits(byte[] stuff, Endianess endianess, int i) {
-            int intBits;
-            if (endianess == Endianess.BIG) {
-                intBits = ((stuff[i] & 0xFF) << 24) |
-                        ((stuff[i + 1] & 0xFF) << 16) |
-                        ((stuff[i + 2] & 0xFF) << 8) |
-                        (stuff[i + 3] & 0xFF);
-            } else { // LITTLE
-                intBits = ((stuff[i + 3] & 0xFF) << 24) |
-                        ((stuff[i + 2] & 0xFF) << 16) |
-                        ((stuff[i + 1] & 0xFF) << 8) |
-                        (stuff[i] & 0xFF);
-            }
-            return intBits;
         }
     }
 

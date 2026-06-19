@@ -4,7 +4,10 @@
  */
 package com.yetnt.ui;
 
+import com.yetnt.methods.InterpMethod;
 import com.yetnt.ut.ClipboardUtil;
+
+import java.util.ArrayList;
 
 /**
  *
@@ -27,6 +30,11 @@ public class InterpretedLabel extends javax.swing.JFrame {
         repaint();
         revalidate();
     }
+    public void setMethods(ArrayList<InterpMethod> methods) {
+        methods.forEach(method -> interpMethodsJMenu.add(
+                method.cloneMenuItem()
+        ));
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -40,6 +48,7 @@ public class InterpretedLabel extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
+        interpMethodsJMenu = new javax.swing.JMenu();
         textJMenu = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
 
@@ -49,6 +58,9 @@ public class InterpretedLabel extends javax.swing.JFrame {
         jTextArea1.setLineWrap(true);
         jTextArea1.setRows(5);
         jScrollPane2.setViewportView(jTextArea1);
+
+        interpMethodsJMenu.setText("Interpretation Methods");
+        jMenuBar1.add(interpMethodsJMenu);
 
         textJMenu.setText("Text");
 
@@ -120,6 +132,7 @@ public class InterpretedLabel extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu interpMethodsJMenu;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JScrollPane jScrollPane2;

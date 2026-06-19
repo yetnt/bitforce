@@ -4,6 +4,11 @@
   <NonVisualComponents>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
+        <Menu class="javax.swing.JMenu" name="interpMethodsJMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Interpretation Methods"/>
+          </Properties>
+        </Menu>
         <Menu class="javax.swing.JMenu" name="textJMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="Text"/>

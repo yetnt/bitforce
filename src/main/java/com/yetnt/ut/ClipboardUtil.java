@@ -1,7 +1,6 @@
 package com.yetnt.ut;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Clipboard;
 
 /**
  * Utility class for interacting with the system clipboard.

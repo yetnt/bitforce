@@ -145,6 +145,7 @@ public class Window extends javax.swing.JFrame {
             method.getRadioButton().addActionListener(a);
             method.getMenuItem().addActionListener(a);
         }
+        interpLabelFrame.setMethods(methods);
         first100BytesMenuItemActionPerformed(null);
         interpMethodsRadioPanel.repaint();
         interpMethodsRadioPanel.revalidate();
@@ -340,8 +341,9 @@ public class Window extends javax.swing.JFrame {
         fileViewLabel = new javax.swing.JLabel();
         innerViewScrollPane = new javax.swing.JScrollPane();
         innerViewJPanel = new javax.swing.JPanel();
-        bitViewRadio = new javax.swing.JRadioButton();
-        byteViewRadio1 = new javax.swing.JRadioButton();
+        binViewRadio = new javax.swing.JRadioButton();
+        hexViewRadio = new javax.swing.JRadioButton();
+        blockViewRadio = new javax.swing.JRadioButton();
         groupingScrollPane = new javax.swing.JScrollPane();
         groupingJPanel = new javax.swing.JPanel();
         singularRadio = new javax.swing.JRadioButton();
@@ -662,22 +664,31 @@ public class Window extends javax.swing.JFrame {
 
         innerViewScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        fileViewBtnGrp.add(bitViewRadio);
-        bitViewRadio.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        bitViewRadio.setSelected(true);
-        bitViewRadio.setText("binary");
-        bitViewRadio.addActionListener(new java.awt.event.ActionListener() {
+        fileViewBtnGrp.add(binViewRadio);
+        binViewRadio.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        binViewRadio.setSelected(true);
+        binViewRadio.setText("binary");
+        binViewRadio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bitViewRadioActionPerformed(evt);
+                binViewRadioActionPerformed(evt);
             }
         });
 
-        fileViewBtnGrp.add(byteViewRadio1);
-        byteViewRadio1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        byteViewRadio1.setText("hex");
-        byteViewRadio1.addActionListener(new java.awt.event.ActionListener() {
+        fileViewBtnGrp.add(hexViewRadio);
+        hexViewRadio.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        hexViewRadio.setText("hex");
+        hexViewRadio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                byteViewRadio1ActionPerformed(evt);
+                hexViewRadioActionPerformed(evt);
+            }
+        });
+
+        fileViewBtnGrp.add(blockViewRadio);
+        blockViewRadio.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        blockViewRadio.setText("blocks");
+        blockViewRadio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                blockViewRadioActionPerformed(evt);
             }
         });
 
@@ -688,18 +699,23 @@ public class Window extends javax.swing.JFrame {
             .addGroup(innerViewJPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(innerViewJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(bitViewRadio, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(byteViewRadio1, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))
+                    .addComponent(binViewRadio, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(hexViewRadio, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                    .addGroup(innerViewJPanelLayout.createSequentialGroup()
+                        .addComponent(blockViewRadio, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         innerViewJPanelLayout.setVerticalGroup(
             innerViewJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(innerViewJPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(bitViewRadio)
+                .addComponent(binViewRadio)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(byteViewRadio1)
-                .addContainerGap(413, Short.MAX_VALUE))
+                .addComponent(hexViewRadio)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(blockViewRadio)
+                .addContainerGap(386, Short.MAX_VALUE))
         );
 
         innerViewScrollPane.setViewportView(innerViewJPanel);
@@ -1106,13 +1122,13 @@ public class Window extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_searchBarJTextFieldActionPerformed
 
-    private void bitViewRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bitViewRadioActionPerformed
+    private void binViewRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_binViewRadioActionPerformed
         _changeview(View.BIN);
-    }//GEN-LAST:event_bitViewRadioActionPerformed
+    }//GEN-LAST:event_binViewRadioActionPerformed
 
-    private void byteViewRadio1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_byteViewRadio1ActionPerformed
+    private void hexViewRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hexViewRadioActionPerformed
         _changeview(View.HEX);
-    }//GEN-LAST:event_byteViewRadio1ActionPerformed
+    }//GEN-LAST:event_hexViewRadioActionPerformed
 
     private void singularRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singularRadioActionPerformed
         _changegrouping(CharGroups.SINGULAR);
@@ -1168,12 +1184,12 @@ public class Window extends javax.swing.JFrame {
 
     private void binaryViewMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_binaryViewMenuItemActionPerformed
         _changeview(View.BIN);
-        bitViewRadio.setSelected(true);
+        binViewRadio.setSelected(true);
     }//GEN-LAST:event_binaryViewMenuItemActionPerformed
 
     private void hexViewMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hexViewMenuItemActionPerformed
         _changeview(View.HEX);
-        byteViewRadio1.setSelected(true);
+        hexViewRadio.setSelected(true);
     }//GEN-LAST:event_hexViewMenuItemActionPerformed
 
     private void singularMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singularMenuItemActionPerformed
@@ -1342,6 +1358,10 @@ public class Window extends javax.swing.JFrame {
         note(file.getName() + " was loaded twin");
     }//GEN-LAST:event_loadFileMenuItemActionPerformed
 
+    private void blockViewRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_blockViewRadioActionPerformed
+        _changeview(View.BLOCKS);
+    }//GEN-LAST:event_blockViewRadioActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1379,10 +1399,10 @@ public class Window extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton bigEdianRadio;
+    private javax.swing.JRadioButton binViewRadio;
     private javax.swing.JMenuItem binaryViewMenuItem;
-    private javax.swing.JRadioButton bitViewRadio;
+    private javax.swing.JRadioButton blockViewRadio;
     private javax.swing.JCheckBox byteIndexCheckBox;
-    private javax.swing.JRadioButton byteViewRadio1;
     private javax.swing.JMenu charGroupingJMenu;
     private javax.swing.JLabel characterGroupingLabel;
     private javax.swing.JMenu curorJMenu;
@@ -1408,6 +1428,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JPanel groupingJPanel;
     private javax.swing.JScrollPane groupingScrollPane;
     private javax.swing.JMenuItem hexViewMenuItem;
+    private javax.swing.JRadioButton hexViewRadio;
     private javax.swing.JPanel innerViewJPanel;
     private javax.swing.JScrollPane innerViewScrollPane;
     private javax.swing.JMenu interpJMenu;

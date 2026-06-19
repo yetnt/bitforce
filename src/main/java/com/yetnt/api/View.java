@@ -20,6 +20,15 @@ public enum View {
      */
     HEX( b ->
             String.format("%02X", b).toCharArray()
+    ),
+    /**
+     * Displays binary as ASCII block characters.
+     */
+    BLOCKS(b -> String.format("%8s", Integer.toBinaryString(b & 0xFF))
+            .replace('1', '█')
+            .replace(' ', '░')
+            .replace('0', '░')
+            .toCharArray()
     );
 
     View(VAFunction function) {
