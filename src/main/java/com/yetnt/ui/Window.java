@@ -40,6 +40,7 @@ public class Window extends javax.swing.JFrame {
     private InterpretedLabel interpLabelFrame = new InterpretedLabel();
     private Cursor selectedCursor;
     private int value2n = 4;
+    private SearchBar search;
 
     /**
      * Creates new form Window
@@ -147,6 +148,7 @@ public class Window extends javax.swing.JFrame {
         }
         interpLabelFrame.setMethods(methods);
         first100BytesMenuItemActionPerformed(null);
+        search = new SearchBar(methods, interpMethodsRadioPanel);
         interpMethodsRadioPanel.repaint();
         interpMethodsRadioPanel.revalidate();
         repaint();
@@ -1119,7 +1121,9 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_littleEndianRadioActionPerformed
 
     private void searchBarJTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBarJTextFieldActionPerformed
-        // TODO add your handling code here:
+        String input = searchBarJTextField.getText();
+        search.search(input);
+        this.requestFocus();
     }//GEN-LAST:event_searchBarJTextFieldActionPerformed
 
     private void binViewRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_binViewRadioActionPerformed
